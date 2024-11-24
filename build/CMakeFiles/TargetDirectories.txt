@@ -1,0 +1,4 @@
+/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/rebuild_cache.dir
+/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/softRenderer.dir
+/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/edit_cache.dir
+/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/calc.dir
