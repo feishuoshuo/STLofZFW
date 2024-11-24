@@ -1,0 +1,1 @@
+/usr/bin/g++  -g  -rdynamic CMakeFiles/softRenderer.dir/src/zfw.cpp.o CMakeFiles/softRenderer.dir/src/other_source.cpp.o  -o softRenderer  libcalc.a 
