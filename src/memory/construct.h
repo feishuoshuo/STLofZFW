@@ -64,11 +64,7 @@ namespace zfwstl
   inline void destroy_cat(ForwardIter _first, ForwardIter _last, std::false_type)
   {
     for (; _first != _last; ++_first)
-<<<<<<< HEAD
       destroy(&*_first);
-=======
-      destroy(&*_first)
->>>>>>> 032d1b48e96f41c8c40afbe26cf6db12f00cbeaf
   }
 
   template <class T>
@@ -76,11 +72,7 @@ namespace zfwstl
   { // NOTE: std::is_trivially_destructible<T>{}相当于创建了一个模板结构的实例
     // TAG: destroy_one(_p, std::is_trivially_destructible<T>{});
     // TODO: 我想尝试不创建实例，而是直接调用其value静态成员返回布尔值
-<<<<<<< HEAD
     destroy_one(_p, std::is_trivially_destructible<T>{});
-=======
-    destroy_one(_p, std::is_trivially_destructible<T>::value);
->>>>>>> 032d1b48e96f41c8c40afbe26cf6db12f00cbeaf
   }
 
   template <class ForwardIter>
