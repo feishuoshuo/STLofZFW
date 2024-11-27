@@ -1,6 +1,7 @@
 #ifndef ZFWSTL_ALLOC_H_
 #define ZFWSTL_ALLOC_H_
 /**
+<<<<<<< HEAD
  * 从 v2.0.0 版本开始，将不再使用内存池，这个文件将被弃用，但暂时保留
  * 推荐使用 <stdlib.h>（C）或 <cstdlib>（C++）来替代 alloc.h 头文件
  *
@@ -8,6 +9,12 @@
  * 配备:
  * 一级配置器_malloc_alloc_template
  * 二级配置器__default_alloc_template 内存池，自由链表free_list
+=======
+ * 内存空间的配置与释放
+ * 配备:
+ * 一级配置器_malloc_alloc_template
+ * 二级配置器__default_alloc_template
+>>>>>>> 032d1b48e96f41c8c40afbe26cf6db12f00cbeaf
  */
 #include <cstddef> // for size_t, ptrdiff_t, nullptr_t
 #include <cstdlib> // for malloc(), free(), realloc(), abort

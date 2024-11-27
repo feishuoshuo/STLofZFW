@@ -1,5 +1,6 @@
 #ifndef ZFWSTL_UNINTIALIZED_H_
 #define ZFWSTL_UNINTIALIZED_H_
+<<<<<<< HEAD
 #include "../iterator.h"             //for value_type()迭代器类型萃取
 #include <type_traits>               //for is_trivially_copy_assignable, true_type, false_type
 #include "construct.h"               // for zfwstl::construct
@@ -84,4 +85,7 @@ namespace zfwstl
                                                   value_type>{});
   }
 }
+=======
+
+>>>>>>> 032d1b48e96f41c8c40afbe26cf6db12f00cbeaf
 #endif // !ZFWSTLSTL_UNINTIALIZED_H_
