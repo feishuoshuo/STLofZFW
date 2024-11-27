@@ -3,8 +3,8 @@
 /**
  * 迭代器的设计
  */
-#include <cstddef> // for ptrdiff_t
-
+#include <cstddef>       // for ptrdiff_t
+#include "type_traits.h" //for m_bool_constant
 namespace zfwstl
 {
   // 五种迭代器类型
@@ -37,16 +37,66 @@ namespace zfwstl
   };
 
   // iterator traits
+  // 用于检测一个类型 T 是否定义了 iterator_category 类型。
+  /**
+   * 这个结构体使用了SFINAE（Substitution Failure Is Not An Error）技术，
+   * 这是一种在模板元编程中常用的技术，用于在编译时根据类型特征来决定模板的选择
+   */
+  template <class T>
+  struct has_iterator_cat
+  {
+  private:
+    struct two
+    {
+      char a;
+      char b;
+    };
+    template <class U>
+    static two test(...);
+    template <class U>
+    static char test(typename U::iterator_category * = 0);
+
+  public:
+    static const bool value = sizeof(test<T>(0)) == sizeof(char); // 表示 T 是否包含 iterator_category
+  };
+
+  // 部分特化的模板，用于提供迭代器的特性
+  template <class Iterator, bool>
+  struct iterator_traits_impl
+  {
+  };
+
   template <class Iterator>
-  struct iterator_traits
+  struct iterator_traits_impl<Iterator, true>
   {
     typedef typename Iterator::iterator_category iterator_category;
     typedef typename Iterator::value_type value_type;
-    typedef typename Iterator::difference_type difference_type;
     typedef typename Iterator::pointer pointer;
     typedef typename Iterator::reference reference;
+    typedef typename Iterator::difference_type difference_type;
   };
 
+  template <class Iterator, bool>
+  struct iterator_traits_helper
+  {
+  };
+
+  // 根据迭代器的类别来提供正确的特性
+  //  使用 std::is_convertible 检查 iterator_category 是否可以转换为 input_iterator_tag 或 output_iterator_tag
+  template <class Iterator>
+  struct iterator_traits_helper<Iterator, true>
+      : public iterator_traits_impl<Iterator,
+                                    std::is_convertible<typename Iterator::iterator_category, input_iterator_tag>::value ||
+                                        std::is_convertible<typename Iterator::iterator_category, output_iterator_tag>::value>
+  {
+  };
+
+  // 萃取迭代器的特性
+  template <class Iterator>
+  struct iterator_traits
+      : public iterator_traits_helper<Iterator, has_iterator_cat<Iterator>::value>
+  {
+  };
   // =========================traits偏特化版本=========================
   //  针对原生指针native pointer的
   template <class T>
@@ -67,6 +117,55 @@ namespace zfwstl
     typedef T *pointer;
     typedef T &reference;
     typedef ptrdiff_t difference_type; // 迭代器之间距离
+  };
+
+  template <class T, class U, bool = has_iterator_cat<iterator_traits<T>>::value>
+  struct has_iterator_cat_of
+      : public m_bool_constant<std::is_convertible<
+            typename iterator_traits<T>::iterator_category, U>::value>
+  {
+  };
+  // ====================萃取某种迭代器====================
+  template <class T, class U>
+  struct has_iterator_cat_of<T, U, false> : public m_false_type
+  {
+  };
+
+  template <class Iter>
+  struct is_exactly_input_iterator : public m_bool_constant<has_iterator_cat_of<Iter, input_iterator_tag>::value &&
+                                                            !has_iterator_cat_of<Iter, forward_iterator_tag>::value>
+  {
+  };
+
+  template <class Iter>
+  struct is_input_iterator : public has_iterator_cat_of<Iter, input_iterator_tag>
+  {
+  };
+
+  template <class Iter>
+  struct is_output_iterator : public has_iterator_cat_of<Iter, output_iterator_tag>
+  {
+  };
+
+  template <class Iter>
+  struct is_forward_iterator : public has_iterator_cat_of<Iter, forward_iterator_tag>
+  {
+  };
+
+  template <class Iter>
+  struct is_bidirectional_iterator : public has_iterator_cat_of<Iter, bidirectional_iterator_tag>
+  {
+  };
+
+  template <class Iter>
+  struct is_random_access_iterator : public has_iterator_cat_of<Iter, random_access_iterator_tag>
+  {
+  };
+
+  template <class Iterator>
+  struct is_iterator : public m_bool_constant<is_input_iterator<Iterator>::value ||
+                                              is_output_iterator<Iterator>::value>
+  {
   };
 
   // =========================迭代器相应型别萃取函数=====================
@@ -168,5 +267,6 @@ namespace zfwstl
 
   // 模板类 : reverse_iterator
   // TODO:代表反向迭代器，使前进为后退，后退为前进
+
 }
 #endif // !ZFWSTLSTL_TYPE_ITERATOR_H_

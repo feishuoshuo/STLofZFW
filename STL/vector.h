@@ -32,6 +32,8 @@ namespace zfwstl
     //  typedef mystl::reverse_iterator<const_iterator> const_reverse_iterator;
 
     allocator_type get_allocator() { return data_allocator(); }
+    template <class U>
+    friend void swap(typename vector<U>::iterator &a, typename vector<U>::iterator &b);
 
   protected:
     // 配置空间并填满内容
@@ -69,8 +71,7 @@ namespace zfwstl
     }
     //=================operator操作运算符重载=====================
     // 复制赋值操作符
-    template <class T>
-    vector<T> &vector<T>::operator=(const vector &rhs)
+    vector<T> &operator=(const vector &rhs)
     {
       if (this != &rhs)
       {
@@ -146,8 +147,8 @@ namespace zfwstl
       MYSTL_DEBUG(n < size());
       return *(begin() + n);
     }
-    pointer data() noexcept { return begin_; }
-    const_pointer data() const noexcept { return begin_; }
+    pointer data() noexcept { return start; }
+    const_pointer data() const noexcept { return start; }
     // 用于访问向量（vector）中的元素，同时提供边界检查(与operator[]最大不同之处)
     reference at(size_type n)
     {
@@ -214,7 +215,7 @@ namespace zfwstl
         try
         {
           new_finish = zfwstl::uninitialized_copy(start, position, new_start);
-          new_finish = zfwstl::uninitialized_fill_n(new_finish, n, value);
+          new_finish = zfwstl::uninitialized_fill_n(new_finish, n, x);
           new_finish = zfwstl::uninitialized_copy(position, finish, new_finish);
         }
         catch (...)
@@ -244,7 +245,7 @@ namespace zfwstl
       --finish;
     }
     // 删除[first, last)范围上的元素
-    void erase(iterator first, iterator last)
+    iterator erase(iterator first, iterator last)
     {
       MYSTL_DEBUG(first >= begin() && last <= end() && !(last < first));
       iterator i = zfwstl::copy(last, finish, first);
@@ -270,9 +271,9 @@ namespace zfwstl
       if (this != &rhs)
       {
         // 直接交换指针即可
-        zfwstl::swap(start, rhs.start);
-        zfwstl::swap(finish, rhs.finish);
-        zfwstl::swap(end_of_storage, rhs.end_of_storage);
+        swap(start, rhs.start);
+        swap(finish, rhs.finish);
+        swap(end_of_storage, rhs.end_of_storage);
       }
     }
     // 重置容器大小
@@ -310,7 +311,7 @@ namespace zfwstl
       }
       else
       {
-        erase(zfwstl::fill_n(begin_, n, value), end_);
+        erase(zfwstl::fill_n(start, n, value), finish);
       }
     }
     // TODO: void assign(std::initializer_list<value_type> il);
@@ -397,13 +398,14 @@ namespace zfwstl
       else
       {
         auto mid = first;
-        mystl::advance(mid, size());
-        mystl::copy(first, mid, start);
-        auto new_finish = mystl::uninitialized_copy(mid, last, finish);
+        zfwstl::advance(mid, size());
+        zfwstl::copy(first, mid, start);
+        auto new_finish = zfwstl::uninitialized_copy(mid, last, finish);
         finish = new_finish;
       }
     }
   };
+
   //========================模板类外重载操作===============
   // TODO:operator操作运算符重载
   // 重载 mystl 的 swap
