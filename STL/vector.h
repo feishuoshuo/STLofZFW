@@ -1,5 +1,9 @@
 #ifndef ZFWSTL_VECTOR_H_
 #define ZFWSTL_VECTOR_H_
+/**
+ * 容器
+ * 迭代器：Random Access iterators
+ */
 #include <cstddef>                       //for size_t, ptrdiff_t
 #include "../src/memory/allocator.h"     //标准空间配置器
 #include "../src/exceptdef.h"            //for 宏MYSTL_DEBUG
@@ -234,7 +238,7 @@ namespace zfwstl
         end_of_storage = start + len;
       }
     }
-
+    // TODO:emplace_back, emplace
     void emplace_back();
     void emplace();
     // 尾部取出元素
@@ -406,9 +410,9 @@ namespace zfwstl
     }
   };
 
-    //========================模板类外重载操作===============
+  //========================模板类外重载操作===============
   // TODO:operator操作运算符重载
-  // 重载 mystl 的 swap
+  // 重载 zfwstl 的 swap
   template <class T>
   void swap(vector<T> &lhs, vector<T> &rhs)
   {
