@@ -213,7 +213,8 @@ namespace zfwstl
   void fill_cat(RandomIter first, RandomIter last, const T &value,
                 zfwstl::random_access_iterator_tag)
   {
-    fill_n(first, last - first, value);
+    auto n = last - first;
+    fill_n(first, n, value);
   }
 
   template <class ForwardIter, class T>

@@ -108,7 +108,7 @@ namespace zfwstl
     typedef __list_node<T> list_node;
     typedef zfwstl::simple_allocator<list_node /* , Alloc */> list_node_allocator; // 专属之空间配置器，每次分配一个节点大小
   public:
-    //  标准空间配置器
+    //  专属空间配置器
     typedef zfwstl::simple_allocator<T> data_allocator;
     typedef zfwstl::simple_allocator<T> allocator_type;
     // list 的嵌套型别定义

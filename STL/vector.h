@@ -8,7 +8,7 @@
 #include "../src/memory/allocator.h"     //标准空间配置器
 #include "../src/exceptdef.h"            //for 宏MYSTL_DEBUG
 #include "../src/memory/unintialized.h"  //for uninitialized_fill_n() uninitialized_copy()
-#include "../src/algorithms/algorithm.h" //for copy_backward(), fill(), copy()
+#include "../src/algorithms/algorithm.h" //for max(), copy_backward(), fill(), copy()
 #include "../src/iterator.h"             // for iterator_category()萃取迭代器类型, distance(), advance()
 namespace zfwstl
 {
@@ -16,7 +16,7 @@ namespace zfwstl
   class vector
   {
   public:
-    //  标准空间配置器
+    //  专属空间配置器
     typedef zfwstl::simple_allocator<T> data_allocator;
     typedef zfwstl::simple_allocator<T> allocator_type;
     // vector的嵌套型别定义
@@ -49,6 +49,7 @@ namespace zfwstl
     }
 
   private:
+    //[start, finish)
     iterator start;          // 正在用的空间头部
     iterator finish;         // 正在用的空间尾部
     iterator end_of_storage; // 储存空间的尾部

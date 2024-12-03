@@ -2,8 +2,8 @@
 #define ZFWSTL_UNINTIALIZED_H_
 #include "../iterator.h"             //for value_type()迭代器类型萃取
 #include <type_traits>               //for is_trivially_copy_assignable, true_type, false_type
-#include "construct.h"               // for zfwstl::construct
-#include "../algorithms/algorithm.h" //for algobase.h 's fill_n
+#include "construct.h"               // for construct(), destroy()
+#include "../algorithms/algorithm.h" //for algobase.h 's fill_n(), fill()
 namespace zfwstl
 {
   // =====================uninitialized_copy=================================
@@ -51,7 +51,40 @@ namespace zfwstl
 
   // =====================uninitialized_fill=====================
   // 在 [first, last) 区间内填充元素值
+  template <class ForwardIter, class T>
+  void
+  unchecked_uninit_fill(ForwardIter first, ForwardIter last, const T &value, std::true_type)
+  {
+    zfwstl::fill(first, last, value);
+  }
 
+  template <class ForwardIter, class T>
+  void
+  unchecked_uninit_fill(ForwardIter first, ForwardIter last, const T &value, std::false_type)
+  {
+    auto cur = first;
+    try
+    {
+      for (; cur != last; ++cur)
+      {
+        zfwstl::construct(&*cur, value);
+      }
+    }
+    catch (...)
+    {
+      for (; first != cur; ++first)
+        zfwstl::destroy(&*first);
+    }
+  }
+
+  template <class ForwardIter, class T>
+  void uninitialized_fill(ForwardIter first, ForwardIter last, const T &value)
+  {
+    zfwstl::unchecked_uninit_fill(first, last, value,
+                                  std::is_trivially_copy_assignable<
+                                      typename iterator_traits<ForwardIter>::
+                                          value_type>{});
+  }
   // =====================uninitialized_fill_n=====================
   // 从 first 位置开始，填充 n 个元素值，返回填充结束的位置
   template <class ForwardIter, class Size, class T>
