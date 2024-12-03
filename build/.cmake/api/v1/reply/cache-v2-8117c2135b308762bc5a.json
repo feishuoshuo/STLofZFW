@@ -839,7 +839,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "STLofZFW"
+			"value" : "Project"
 		},
 		{
 			"name" : "CMAKE_RANLIB",
@@ -1120,6 +1120,30 @@
 			],
 			"type" : "BOOL",
 			"value" : "FALSE"
+		},
+		{
+			"name" : "Project_BINARY_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/home/zhoufeiwei/Desktop/STLofZFW/build"
+		},
+		{
+			"name" : "Project_SOURCE_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/home/zhoufeiwei/Desktop/STLofZFW"
 		},
 		{
 			"name" : "STLofZFW_BINARY_DIR",

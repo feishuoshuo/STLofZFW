@@ -110,113 +110,6 @@ depend:
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named softRenderer
-
-# Build rule for target.
-softRenderer: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 softRenderer
-.PHONY : softRenderer
-
-# fast build rule for target.
-softRenderer/fast:
-	$(MAKE) -f CMakeFiles/softRenderer.dir/build.make CMakeFiles/softRenderer.dir/build
-.PHONY : softRenderer/fast
-
-#=============================================================================
-# Target rules for targets named calc
-
-# Build rule for target.
-calc: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 calc
-.PHONY : calc
-
-# fast build rule for target.
-calc/fast:
-	$(MAKE) -f CMakeFiles/calc.dir/build.make CMakeFiles/calc.dir/build
-.PHONY : calc/fast
-
-STL/calcCMake.o: STL/calcCMake.cpp.o
-
-.PHONY : STL/calcCMake.o
-
-# target to build an object file
-STL/calcCMake.cpp.o:
-	$(MAKE) -f CMakeFiles/calc.dir/build.make CMakeFiles/calc.dir/STL/calcCMake.cpp.o
-.PHONY : STL/calcCMake.cpp.o
-
-STL/calcCMake.i: STL/calcCMake.cpp.i
-
-.PHONY : STL/calcCMake.i
-
-# target to preprocess a source file
-STL/calcCMake.cpp.i:
-	$(MAKE) -f CMakeFiles/calc.dir/build.make CMakeFiles/calc.dir/STL/calcCMake.cpp.i
-.PHONY : STL/calcCMake.cpp.i
-
-STL/calcCMake.s: STL/calcCMake.cpp.s
-
-.PHONY : STL/calcCMake.s
-
-# target to generate assembly for a file
-STL/calcCMake.cpp.s:
-	$(MAKE) -f CMakeFiles/calc.dir/build.make CMakeFiles/calc.dir/STL/calcCMake.cpp.s
-.PHONY : STL/calcCMake.cpp.s
-
-src/other_source.o: src/other_source.cpp.o
-
-.PHONY : src/other_source.o
-
-# target to build an object file
-src/other_source.cpp.o:
-	$(MAKE) -f CMakeFiles/softRenderer.dir/build.make CMakeFiles/softRenderer.dir/src/other_source.cpp.o
-.PHONY : src/other_source.cpp.o
-
-src/other_source.i: src/other_source.cpp.i
-
-.PHONY : src/other_source.i
-
-# target to preprocess a source file
-src/other_source.cpp.i:
-	$(MAKE) -f CMakeFiles/softRenderer.dir/build.make CMakeFiles/softRenderer.dir/src/other_source.cpp.i
-.PHONY : src/other_source.cpp.i
-
-src/other_source.s: src/other_source.cpp.s
-
-.PHONY : src/other_source.s
-
-# target to generate assembly for a file
-src/other_source.cpp.s:
-	$(MAKE) -f CMakeFiles/softRenderer.dir/build.make CMakeFiles/softRenderer.dir/src/other_source.cpp.s
-.PHONY : src/other_source.cpp.s
-
-src/zfw.o: src/zfw.cpp.o
-
-.PHONY : src/zfw.o
-
-# target to build an object file
-src/zfw.cpp.o:
-	$(MAKE) -f CMakeFiles/softRenderer.dir/build.make CMakeFiles/softRenderer.dir/src/zfw.cpp.o
-.PHONY : src/zfw.cpp.o
-
-src/zfw.i: src/zfw.cpp.i
-
-.PHONY : src/zfw.i
-
-# target to preprocess a source file
-src/zfw.cpp.i:
-	$(MAKE) -f CMakeFiles/softRenderer.dir/build.make CMakeFiles/softRenderer.dir/src/zfw.cpp.i
-.PHONY : src/zfw.cpp.i
-
-src/zfw.s: src/zfw.cpp.s
-
-.PHONY : src/zfw.s
-
-# target to generate assembly for a file
-src/zfw.cpp.s:
-	$(MAKE) -f CMakeFiles/softRenderer.dir/build.make CMakeFiles/softRenderer.dir/src/zfw.cpp.s
-.PHONY : src/zfw.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -224,18 +117,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... softRenderer"
 	@echo "... edit_cache"
-	@echo "... calc"
-	@echo "... STL/calcCMake.o"
-	@echo "... STL/calcCMake.i"
-	@echo "... STL/calcCMake.s"
-	@echo "... src/other_source.o"
-	@echo "... src/other_source.i"
-	@echo "... src/other_source.s"
-	@echo "... src/zfw.o"
-	@echo "... src/zfw.i"
-	@echo "... src/zfw.s"
 .PHONY : help
 
 
