@@ -6,7 +6,9 @@
  */
 #include <cstddef> //for size_t, ptrdiff_t
 #include "vector.h"
-#include "../src/functional.h"
+#include "../src/functional.h" //for less
+#include "heap.h"              //for push_heap, pop_heap, sort_heap, make_heap
+#include "../src/iterator.h"   //for is_input_iterator
 namespace zfwstl
 {
 
@@ -30,6 +32,50 @@ namespace zfwstl
   public:
     // 构造、复制、移动函数
     // TODO:可以完善
+    priority_queue() : c() {}
+    explicit priority_queue(const value_compare &x) : c(), comp(x) {}
+    template <class InputIter, typename std::enable_if<
+                                   zfwstl::is_input_iterator<InputIter>::value, int>::type = 0>
+    priority_queue(InputIter first, InputIter last, const Compare &x) : c(first, last), comp(x) { zfwstl::make_heap(c.begin(), c.end(), comp); }
+    template <class InputIter, typename std::enable_if<
+                                   zfwstl::is_input_iterator<InputIter>::value, int>::type = 0>
+    priority_queue(InputIter first, InputIter last) : c(first, last)
+    {
+      MYSTL_DEBUG(!(last < first));
+      make_heap(c.begin(), c.end(), comp);
+    }
+
+    // 以下完全利用底层容器 c的操作完成
+    bool empty() const { return c.empty(); }
+    size_type size() const { return c.size(); }
+    size_type max_size() const { return c.max_size(); }
+    reference top() { return c.front(); }
+    const_reference top() const { return c.front(); }
+
+    void push(const value_type &x)
+    {
+      try
+      {
+        c.push_back(x);
+        push_heap(c.begin(), c.end(), comp);
+      }
+      catch (...)
+      {
+        c.clear();
+      }
+    }
+    void pop()
+    {
+      try
+      {
+        pop_heap(c.begin(), c.end(), comp);
+        c.pop_back();
+      }
+      catch (...)
+      {
+        c.clear();
+      }
+    }
   };
 
 }

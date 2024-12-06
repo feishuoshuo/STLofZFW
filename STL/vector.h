@@ -9,7 +9,7 @@
 #include "../src/exceptdef.h"            //for 宏MYSTL_DEBUG
 #include "../src/memory/unintialized.h"  //for uninitialized_fill_n() uninitialized_copy()
 #include "../src/algorithms/algorithm.h" //for max(), copy_backward(), fill(), copy()
-#include "../src/iterator.h"             // for iterator_category()萃取迭代器类型, distance(), advance()
+#include "../src/iterator.h"             // for iterator_category()萃取迭代器类型, distance(), advance(), is_input_iterator
 namespace zfwstl
 {
   template <class T /*,class Alloc=alloc*/>

@@ -6,8 +6,8 @@
  * 底层数据结构：使用array实现完全二叉树(complete binary tree)
  * heap 的四个算法: push_heap, pop_heap, sort_heap, make_heap
  */
-#include <cstddef> //for size_t, ptrdiff_t
-#include "../src/iterator.h"
+#include <cstddef>           //for size_t, ptrdiff_t
+#include "../src/iterator.h" //for distance_type
 namespace zfwstl
 {
 
@@ -31,8 +31,8 @@ namespace zfwstl
   }
   // 重载版本使用函数对象 comp 代替比较操作
   template <class RandomIter, class Distance, class T, class Compared>
-  void push_heap_aux(RandomIter first, Distance holeIndex, Distance topIndex, T value,
-                     Compared comp)
+  void __push_heap(RandomIter first, Distance holeIndex, Distance topIndex, T value,
+                   Compared comp)
   {
     auto parent = (holeIndex - 1) / 2;
     while (holeIndex > topIndex && comp(*(first + parent), value))
