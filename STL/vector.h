@@ -67,6 +67,12 @@ namespace zfwstl
     // TAG: explicit 防止编译器使用该构造函数进行隐式类型转换
     // 杜绝 vector<int> v = 10;编译通过
     explicit vector(size_type n) { init_space(n, T()); }
+    template <class Iter, typename std::enable_if<zfwstl::is_input_iterator<Iter>::value, int>::type = 0>
+    vector(Iter first, Iter last)
+    {
+      MYSTL_DEBUG(!(last < first));
+      range_init(first, last);
+    }
     ~vector()
     {
       size_type n = end_of_storage - start;
@@ -328,6 +334,15 @@ namespace zfwstl
       start = allocate_and_fill(n, value);
       finish = start + n;
       end_of_storage = finish;
+    }
+    // range_init 函数
+    template <class Iter>
+    void range_init(Iter first, Iter last)
+    {
+      const size_type len = zfwstl::distance(first, last);
+      const size_type init_size = zfwstl::max(len, static_cast<size_type>(16));
+      init_space(len, init_size);
+      zfwstl::uninitialized_copy(first, last, start);
     }
     // 指定位置插入元素，涉及是否需要扩容
     void inser_aux(iterator position, const T &x)

@@ -179,6 +179,14 @@ namespace zfwstl
     return category(); // 暂时对象 用于分类迭代器的
   }
 
+  // 萃取某个迭代器的 distance_type
+  template <class Iterator>
+  typename iterator_traits<Iterator>::difference_type *
+  distance_type(const Iterator &)
+  {
+    return static_cast<typename iterator_traits<Iterator>::difference_type *>(0);
+  }
+
   template <class Iterator>
   inline typename iterator_traits<Iterator>::value_type *
   value_type(const Iterator &)

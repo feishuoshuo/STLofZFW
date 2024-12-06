@@ -598,6 +598,7 @@ namespace zfwstl
       map_pointer new_nstart;
       if (map_size > 2 * new_num_nodes)
       { // 当前的内存分配是新节点数量的两倍大，说明有足够的空间来添加新节点
+        // NOTE:将现有元素挪至合适的deque中间，使得两边空闲空间相对平衡
         new_nstart = map + (map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
         if (new_nstart < start.node)
           zfwstl::copy(start.node, finish.node + 1, new_nstart);

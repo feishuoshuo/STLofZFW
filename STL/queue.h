@@ -5,6 +5,7 @@
  * 属于container adapter
  */
 #include <cstddef> //for size_t, ptrdiff_t
+#include "deque.h"
 namespace zfwstl
 {
   template <class T, class Container = zfwstl::deque<T>>
@@ -20,6 +21,8 @@ namespace zfwstl
     typedef typename Container::size_type size_type;
     typedef typename Container::reference reference;
     typedef typename Container::const_reference const_reference;
+    static_assert(std::is_same<T, value_type>::value,
+                  "the value_type of Container should be same with T");
 
   private:
     container_type c; // 底层容器
