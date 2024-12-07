@@ -122,7 +122,7 @@ namespace zfwstl
     typedef list_node *link_type;
 
     typedef __list_iterator<T, T &, T *> iterator;
-    typedef __list_iterator<const T, const T &, const T *> const_iterator;
+    typedef __list_iterator<T, const T &, const T *> const_iterator;
     // TODO:以后可以添加反向迭代器
     // typedef mystl::reverse_iterator<iterator> reverse_iterator;
     // typedef mystl::reverse_iterator<const_iterator> const_reverse_iterator;
@@ -356,7 +356,7 @@ namespace zfwstl
     {
       return list_node_allocator::allocate();
     }
-    void put_node(link_type p) { list_node_allocator::deallocate(p); }
+    void pop_node(link_type p) { list_node_allocator::deallocate(p); }
     // 产生(配置并构造)一个节点，带元素值
     link_type create_node(const T &x)
     {
@@ -368,7 +368,7 @@ namespace zfwstl
     void destroy_node(link_type p)
     {
       zfwstl::destroy(&p->data);
-      put_node(p);
+      pop_node(p);
     }
     void empty_initialize(size_type n, const value_type &value)
     {
