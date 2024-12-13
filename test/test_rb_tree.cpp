@@ -15,20 +15,39 @@ int main()
    * 红黑树
    */
   zfwstl::rb_tree<int, int, KeyOfValue<int>, zfwstl::less<int>> itree;
-  cout << itree.size() << endl;
+  std::cout << itree.size() << std::endl;
+  // 插入唯一元素
+  auto result = itree.insert_unique(17);
 
-  itree.insert_equal(17);
-  itree.insert_equal(18);
-  itree.insert_equal(23);
-  itree.insert_equal(34);
+  // 检查插入是否成功
+  if (result.second)
+  {
+    std::cout << "Insertion successful." << std::endl;
+  }
+  else
+  {
+    std::cout << "Insertion failed. Element already exists." << std::endl;
+  }
+  result = itree.insert_unique(18);
+  result = itree.insert_unique(17);
+  if (result.second)
+  {
+    std::cout << "Insertion successful." << std::endl;
+  }
+  else
+  {
+    std::cout << "Insertion failed. Element already exists." << std::endl;
+  }
+  result = itree.insert_unique(23);
+  result = itree.insert_unique(34);
 
-  itree.insert_equal(27);
-  itree.insert_equal(15);
-  itree.insert_equal(9);
-  itree.insert_equal(6);
-  itree.insert_equal(8);
-  itree.insert_equal(5);
-  itree.insert_equal(25);
+  result = itree.insert_unique(27);
+  result = itree.insert_unique(15);
+  result = itree.insert_unique(9);
+  result = itree.insert_unique(6);
+  result = itree.insert_unique(8);
+  result = itree.insert_unique(5);
+  result = itree.insert_unique(25);
 
   std::cout << itree.size() << std::endl;
   zfwstl::rb_tree<int, int, KeyOfValue<int>, zfwstl::less<int>>::iterator ite1 = itree.begin();

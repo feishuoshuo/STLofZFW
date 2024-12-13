@@ -66,6 +66,13 @@ namespace zfwstl
     T operator()(const T &x) const { return -x; }
   };
 
+  // 证同元素
+  template <class T>
+  struct identity : public unarg_function<T, T>
+  {
+    const T &operator()(const T &x) const { return x; }
+  };
+
   // 加法的证同元素
   template <class T>
   T identity_element(plus<T>) { return T(0); }

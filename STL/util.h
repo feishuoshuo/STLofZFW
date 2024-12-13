@@ -51,7 +51,23 @@ namespace zfwstl
                   std::is_default_constructible<Other1>::value &&
                       std::is_default_constructible<Other2>::value,
                   void>::type>
-    constexpr pair() : first(), second() {}
+    constexpr pair()
+        : first(), second()
+    {
+    }
+
+    // implicit constructiable for this type
+    template <class U1 = Ty1, class U2 = Ty2,
+              typename std::enable_if<
+                  std::is_copy_constructible<U1>::value &&
+                      std::is_copy_constructible<U2>::value &&
+                      std::is_convertible<const U1 &, Ty1>::value &&
+                      std::is_convertible<const U2 &, Ty2>::value,
+                  int>::type = 0>
+    constexpr pair(const Ty1 &a, const Ty2 &b)
+        : first(a), second(b)
+    {
+    }
 
     // explicit constructible for this type
     template <class U1 = Ty1, class U2 = Ty2,
@@ -61,7 +77,10 @@ namespace zfwstl
                       (!std::is_convertible<const U1 &, Ty1>::value ||
                        !std::is_convertible<const U2 &, Ty2>::value),
                   int>::type = 0>
-    explicit constexpr pair(const Ty1 &a, const Ty2 &b) : first(a), second(b) {}
+    explicit constexpr pair(const Ty1 &a, const Ty2 &b)
+        : first(a), second(b)
+    {
+    }
 
     pair(const pair &rhs) = default;
     pair(pair &&rhs) = default;
@@ -74,7 +93,11 @@ namespace zfwstl
                       std::is_convertible<Other1 &&, Ty1>::value &&
                       std::is_convertible<Other2 &&, Ty2>::value,
                   int>::type = 0>
-    constexpr pair(Other1 &&a, Other2 &&b) : first(zfwstl::forward<Other1>(a)), second(zfwstl::forward<Other2>(b)) {}
+    constexpr pair(Other1 &&a, Other2 &&b)
+        : first(mystl::forward<Other1>(a)),
+          second(mystl::forward<Other2>(b))
+    {
+    }
 
     // explicit constructiable for other type
     template <class Other1, class Other2,
@@ -84,7 +107,11 @@ namespace zfwstl
                       (!std::is_convertible<Other1, Ty1>::value ||
                        !std::is_convertible<Other2, Ty2>::value),
                   int>::type = 0>
-    explicit constexpr pair(Other1 &&a, Other2 &&b) : first(zfwstl::forward<Other1>(a)), second(zfwstl::forward<Other2>(b)) {}
+    explicit constexpr pair(Other1 &&a, Other2 &&b)
+        : first(mystl::forward<Other1>(a)),
+          second(mystl::forward<Other2>(b))
+    {
+    }
 
     // implicit constructiable for other pair
     template <class Other1, class Other2,
@@ -94,7 +121,11 @@ namespace zfwstl
                       std::is_convertible<const Other1 &, Ty1>::value &&
                       std::is_convertible<const Other2 &, Ty2>::value,
                   int>::type = 0>
-    constexpr pair(const pair<Other1, Other2> &other) : first(other.first), second(other.second) {}
+    constexpr pair(const pair<Other1, Other2> &other)
+        : first(other.first),
+          second(other.second)
+    {
+    }
 
     // explicit constructiable for other pair
     template <class Other1, class Other2,
@@ -104,7 +135,11 @@ namespace zfwstl
                       (!std::is_convertible<const Other1 &, Ty1>::value ||
                        !std::is_convertible<const Other2 &, Ty2>::value),
                   int>::type = 0>
-    explicit constexpr pair(const pair<Other1, Other2> &other) : first(other.first), second(other.second) {}
+    explicit constexpr pair(const pair<Other1, Other2> &other)
+        : first(other.first),
+          second(other.second)
+    {
+    }
 
     // implicit constructiable for other pair
     template <class Other1, class Other2,
@@ -114,7 +149,11 @@ namespace zfwstl
                       std::is_convertible<Other1, Ty1>::value &&
                       std::is_convertible<Other2, Ty2>::value,
                   int>::type = 0>
-    constexpr pair(pair<Other1, Other2> &&other) : first(zfwstl::forward<Other1>(other.first)), second(zfwstl::forward<Other2>(other.second)) {}
+    constexpr pair(pair<Other1, Other2> &&other)
+        : first(mystl::forward<Other1>(other.first)),
+          second(mystl::forward<Other2>(other.second))
+    {
+    }
 
     // explicit constructiable for other pair
     template <class Other1, class Other2,
@@ -124,7 +163,11 @@ namespace zfwstl
                       (!std::is_convertible<Other1, Ty1>::value ||
                        !std::is_convertible<Other2, Ty2>::value),
                   int>::type = 0>
-    explicit constexpr pair(pair<Other1, Other2> &&other) : first(zfwstl::forward<Other1>(other.first)), second(zfwstl::forward<Other2>(other.second)) {}
+    explicit constexpr pair(pair<Other1, Other2> &&other)
+        : first(mystl::forward<Other1>(other.first)),
+          second(mystl::forward<Other2>(other.second))
+    {
+    }
 
     // copy assign for this pair
     pair &operator=(const pair &rhs)
@@ -142,8 +185,8 @@ namespace zfwstl
     {
       if (this != &rhs)
       {
-        first = zfwstl::move(rhs.first);
-        second = zfwstl::move(rhs.second);
+        first = mystl::move(rhs.first);
+        second = mystl::move(rhs.second);
       }
       return *this;
     }
@@ -161,8 +204,8 @@ namespace zfwstl
     template <class Other1, class Other2>
     pair &operator=(pair<Other1, Other2> &&other)
     {
-      first = zfwstl::forward<Other1>(other.first);
-      second = zfwstl::forward<Other2>(other.second);
+      first = mystl::forward<Other1>(other.first);
+      second = mystl::forward<Other2>(other.second);
       return *this;
     }
 
@@ -172,10 +215,61 @@ namespace zfwstl
     {
       if (this != &other)
       {
-        zfwstl::swap(first, other.first);
-        zfwstl::swap(second, other.second);
+        mystl::swap(first, other.first);
+        mystl::swap(second, other.second);
       }
     }
   };
+
+  // 重载比较操作符
+  template <class Ty1, class Ty2>
+  bool operator==(const pair<Ty1, Ty2> &lhs, const pair<Ty1, Ty2> &rhs)
+  {
+    return lhs.first == rhs.first && lhs.second == rhs.second;
+  }
+
+  template <class Ty1, class Ty2>
+  bool operator<(const pair<Ty1, Ty2> &lhs, const pair<Ty1, Ty2> &rhs)
+  {
+    return lhs.first < rhs.first || (lhs.first == rhs.first && lhs.second < rhs.second);
+  }
+
+  template <class Ty1, class Ty2>
+  bool operator!=(const pair<Ty1, Ty2> &lhs, const pair<Ty1, Ty2> &rhs)
+  {
+    return !(lhs == rhs);
+  }
+
+  template <class Ty1, class Ty2>
+  bool operator>(const pair<Ty1, Ty2> &lhs, const pair<Ty1, Ty2> &rhs)
+  {
+    return rhs < lhs;
+  }
+
+  template <class Ty1, class Ty2>
+  bool operator<=(const pair<Ty1, Ty2> &lhs, const pair<Ty1, Ty2> &rhs)
+  {
+    return !(rhs < lhs);
+  }
+
+  template <class Ty1, class Ty2>
+  bool operator>=(const pair<Ty1, Ty2> &lhs, const pair<Ty1, Ty2> &rhs)
+  {
+    return !(lhs < rhs);
+  }
+
+  // 重载 mystl 的 swap
+  template <class Ty1, class Ty2>
+  void swap(pair<Ty1, Ty2> &lhs, pair<Ty1, Ty2> &rhs)
+  {
+    lhs.swap(rhs);
+  }
+
+  // 全局函数，让两个数据成为一个 pair
+  template <class Ty1, class Ty2>
+  pair<Ty1, Ty2> make_pair(Ty1 &&first, Ty2 &&second)
+  {
+    return pair<Ty1, Ty2>(mystl::forward<Ty1>(first), mystl::forward<Ty2>(second));
+  }
 }
 #endif // !ZFWSTL_UTIL_H_

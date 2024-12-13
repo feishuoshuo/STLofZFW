@@ -5,9 +5,10 @@
  * 左根右 根叶黑 不红红 黑路同
  */
 #include <cstddef>                   //for size_t, ptrdiff_t
-#include "../src/iterator.h"         //for bidirectional_iterator_tag
+#include "../src/iterator.h"         //for bidirectional_iterator_tag, distance
 #include "../src/memory/allocator.h" //标准空间配置器
-#include "../src/util.h"             //for pair<iterator,bool>
+#include "../src/util.h"             //for pair<iterator,bool>, swap
+#include "../src/exceptdef.h"        //for THROW_LENGTH_ERROR_IF
 namespace zfwstl
 {
   typedef bool __rb_tree_color_type;
@@ -118,7 +119,8 @@ namespace zfwstl
 
     __rb_tree_iterator() {}
     __rb_tree_iterator(link_type x) { node = x; }
-    __rb_tree_iterator(const iterator &it) { node = it.node; }
+    __rb_tree_iterator(const iterator &rhs) { node = rhs.node; }
+    __rb_tree_iterator(const const_iterator &rhs) { node = rhs.node; }
 
     // TAG：强制类型转换 static_cast, dynamic_cast
     /**
@@ -259,13 +261,31 @@ namespace zfwstl
     // TODO：操作符重载=
     rb_tree &operator=(const rb_tree &rhs);
 
+    void swap(rb_tree &rhs)
+    {
+      if (this != &rhs)
+      {
+        zfwstl::swap(header, rhs.header);
+        zfwstl::swap(node_count, rhs.node_count);
+        zfwstl::swap(key_compare, rhs.key_compare);
+      }
+    }
+
     // 容量相关操作
-    Compare key_comp() const { return key_compare; }
+    Compare
+    key_comp() const
+    {
+      return key_compare;
+    }
     bool empty() const noexcept { return node_count == 0; }
     size_type size() const noexcept { return node_count; }
     size_type max_size() const noexcept { return static_cast<size_type>(-1); } // 理论最大大小
     iterator begin() { return iterator(leftmost()); /*使用iterator构造函数*/ } // RB树的起头为最小/左节点处
-    iterator end() { return header; }                                          // RB树的终点为header所指出
+    iterator end() { return header; }
+    const_iterator begin() const { return const_iterator(leftmost()); }
+    const_iterator end() const { return const_iterator(header); }
+    iterator rend();
+    iterator rbegin();
 
     iterator find(const Key &k)
     {
@@ -300,13 +320,46 @@ namespace zfwstl
         node_count = 0;
       }
     }
-    iterator erase(iterator hint);
+    void erase(iterator hint)
+    {
+      auto y = rb_tree_erase_rebalance(hint.node, header->parent, header->left, header->right);
+      destroy_node(static_cast<link_type>(y));
+      --node_count;
+    }
+    void erase(iterator __first, iterator __last)
+    {
+      if (__first == begin() && __last == end())
+        clear();
+      else
+        while (__first != __last)
+          erase(__first++);
+    }
+    // 删除键值等于 key 的元素，返回删除的个数
+    size_type erase(const key_type &x)
+    {
+      auto __p = equal_range(x);
+      auto n = zfwstl::distance(__p.first, __p.second);
+      erase(__p.first, __p.second);
+      return n;
+    }
+
     iterator copy(iterator x, iterator p);
+    // 统计某个给定键（key）在容器中出现的唯一次数
+    size_type count_unique(const key_type &key) const
+    {
+      return find(key) != end() ? 1 : 0;
+    }
+    size_type count_multi(const key_type &key) const
+    {
+      auto p = equal_range_multi(key);
+      return static_cast<size_type>(zfwstl::distance(p.first, p.second));
+    }
     //=====================修改红黑树相关操作insert, erase=====================
     // 被插入节点的key在整棵树中，必须是独一无二的
     // 若树中已有相同key，插入操作不会真正进行
-    // TODO:有问题！！！
-    zfwstl::pair<iterator, bool> insert_unique(const value_type &v)
+    // TODO:有问题！！！pair
+    std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare>::iterator, bool>
+    insert_unique(const value_type &v)
     {
       link_type y = header;
       link_type x = root();
@@ -322,15 +375,33 @@ namespace zfwstl
       if (comp)
       {
         if (j == begin())
-          return zfwstl::pair<iterator, bool>(__insert(x, y, v), true);
+          return std::pair<iterator, bool>(__insert(x, y, v), true);
         else
           --j;
       }
-      if (key_compare(key(j.node)), KeyOfValue()(v)) // j指向的节点值小于v值，x新插入点在右子节点
-        return zfwstl::pair<iterator, bool>(__insert(x, y, v), true);
+      if (key_compare(key(j.node), KeyOfValue()(v))) // j指向的节点值小于v值，x新插入点在右子节点
+        return std::pair<iterator, bool>(__insert(x, y, v), true);
 
       // 至此，新值v一定与树中键值重复，则不插入
-      return zfwstl::pair<iterator, bool>(j, false);
+      return std::pair<iterator, bool>(j, false);
+    }
+    void insert_unique(const_iterator __first, const_iterator __last)
+    {
+      for (; __first != __last; ++__first)
+        insert_unique(*__first);
+    }
+    void insert_unique(iterator __first, iterator __last)
+    {
+      for (; __first != __last; ++__first)
+        insert_unique(*__first);
+    }
+    template <class InputIterator>
+    void insert_unique(InputIterator first, InputIterator last)
+    {
+      size_type n = zfwstl::distance(first, last);
+      THROW_LENGTH_ERROR_IF(node_count > max_size() - n, "rb_tree<T, Comp>'s size too big");
+      for (; n > 0; --n, ++first)
+        insert_unique(*first);
     }
     // 可插入重复key
     iterator insert_equal(const value_type &v)
@@ -345,6 +416,75 @@ namespace zfwstl
         x = key_compare(KeyOfValue()(v), key(x)) ? left(x) : right(x);
       }
       return __insert(x, y, v); // x新插入点，y插入点父节点，v新值
+    }
+
+    //==========================
+    size_type count(const key_type &k) const
+    {
+      // TODO
+      auto p = equal_range(k);
+      return static_cast<size_type>(zfwstl::distance(p.first, p.second));
+      ;
+    }
+    iterator lower_bound(const key_type &k)
+    {
+      link_type y = header; // 最后一个不小于K的节点
+      link_type x = root(); // 当前节点
+
+      while (x != 0)
+        if (!key_compare(key(x), k))
+          y = x, x = left(x);
+        else
+          x = right(x);
+
+      return iterator(y);
+    }
+    const_iterator lower_bound(const key_type &k) const
+    {
+      link_type y = header; // 最后一个不小于K的节点
+      link_type x = root(); // 当前节点
+
+      while (x != 0)
+        if (!key_compare(key(x), k))
+          y = x, x = left(x);
+        else
+          x = right(x);
+
+      return iterator(y);
+    }
+    iterator upper_bound(const key_type &k)
+    {
+      link_type y = header;
+      link_type x = root();
+
+      while (x != 0)
+        if (key_compare(k, key(x)))
+          y = x, x = left(x);
+        else
+          x = right(x);
+
+      return iterator(y);
+    }
+    const_iterator upper_bound(const key_type &k) const
+    {
+      link_type y = header;
+      link_type x = root();
+
+      while (x != 0)
+        if (key_compare(k, key(x)))
+          y = x, x = left(x);
+        else
+          x = right(x);
+
+      return iterator(y);
+    }
+    std::pair<iterator, iterator> equal_range(const key_type &k)
+    {
+      return std::pair<iterator, iterator>(lower_bound(k), upper_bound(k));
+    }
+    std::pair<const_iterator, const_iterator> equal_range(const key_type &k) const
+    {
+      return std::pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k));
     }
 
   private:
@@ -436,8 +576,7 @@ namespace zfwstl
       x->parent = y;
     }
     // 调整红黑树，旋转及改变颜色
-    void
-    __rb_tree_rebalance(__rb_tree_node_base *x, __rb_tree_node_base *&root)
+    void __rb_tree_rebalance(__rb_tree_node_base *x, __rb_tree_node_base *&root)
     {
       x->color = __rb_tree_red; // 新节点必为红色
       while (x != root && x->parent->color == __rb_tree_red)
@@ -495,6 +634,168 @@ namespace zfwstl
       }
       // while结束
       root->color = __rb_tree_black; // 根节点永远为黑
+    }
+    base_ptr rb_tree_erase_rebalance(base_ptr z, base_ptr &root, base_ptr &left_m, base_ptr &right_m)
+    {
+      base_ptr d = z;
+      base_ptr r_parent = nullptr; // d节点的孩子节点的父节点
+      base_ptr r = nullptr;        // d节点的孩子节点
+      // 1-确定替代节点r
+      if (!d->left)
+        r = d->right;
+      else if (!d->right)
+        r = d->left;
+      else
+      { // 右子树的最小节点作为替代节点, 也就是接下来的d的子节点
+        d = d->right;
+        while (d->left)
+          d = d->left;
+        r = d->right;
+      }
+      // 2-重新链接替代节点
+      // 暗指删除节点d均有左右孩子：让后继节点替代它
+      if (d != z)
+      {
+        z->left->parent = d;
+        d->left = z->left;
+
+        // 如果 d 不是 z 的右子节点，那么 z 的右子节点一定有左孩子
+        if (d != z->right)
+        { // r 替换 d 的位置
+          r_parent = d->parent;
+          if (r != nullptr)
+            r->parent = d->parent;
+
+          d->parent->left = r;
+          d->right = z->right;
+          z->right->parent = d;
+        }
+        else
+        {
+          r_parent = d;
+        }
+
+        // 连接 d 与 z 的父节点
+        if (root == z)
+          root = d;
+        else if (z->parent->left == z)
+          z->parent->left = d;
+        else
+          z->parent->right = d;
+        d->parent = z->parent;
+        auto tmp = d->color;
+        d->color = z->color;
+        z->color = tmp;
+        d = z;
+      }
+      else
+      {
+        r_parent = d->parent;
+        if (r)
+          r->parent = d->parent;
+        if (root == z)
+          root = r;
+        else if (z->parent->left == z)
+          z->parent->left = r;
+        else
+          z->parent->right = r;
+        if (left_m == z)
+          if (z->right == 0) // z->left must be null also
+            left_m = z->parent;
+          // makes left_m == header if z == root
+          else
+            left_m = minimum(static_cast<link_type>(r));
+        if (right_m == z)
+          if (z->left == 0) // z->right must be null also
+            right_m = z->parent;
+          // makes __rightmost == header if z == root
+          else // r == z->left
+            right_m = maximum(static_cast<link_type>(r));
+      }
+
+      if (d->color != __rb_tree_red)
+      {
+        while (r != root && (!r || r->color == __rb_tree_black))
+          if (r == r_parent->left)
+          {
+            base_ptr __w = r_parent->right;
+            if (__w->color == __rb_tree_red)
+            {
+              __w->color = __rb_tree_black;
+              r_parent->color = __rb_tree_red;
+              __rb_tre_rotate_left(r_parent, root);
+              __w = r_parent->right;
+            }
+            if ((!__w->left ||
+                 __w->left->color == __rb_tree_black) &&
+                (!__w->right ||
+                 __w->right->color == __rb_tree_black))
+            {
+              __w->color = __rb_tree_red;
+              r = r_parent;
+              r_parent = r_parent->parent;
+            }
+            else
+            {
+              if (!__w->right ||
+                  __w->right->color == __rb_tree_black)
+              {
+                if (__w->left)
+                  __w->left->color = __rb_tree_black;
+                __w->color = __rb_tree_red;
+                __rb_tre_rotate_right(__w, root);
+                __w = r_parent->right;
+              }
+              __w->color = r_parent->color;
+              r_parent->color = __rb_tree_black;
+              if (__w->right)
+                __w->right->color = __rb_tree_black;
+              __rb_tre_rotate_left(r_parent, root);
+              break;
+            }
+          }
+          else
+          { // same as above, with right <-> left.
+            base_ptr __w = r_parent->left;
+            if (__w->color == __rb_tree_red)
+            {
+              __w->color = __rb_tree_black;
+              r_parent->color = __rb_tree_red;
+              __rb_tre_rotate_right(r_parent, root);
+              __w = r_parent->left;
+            }
+            if ((!__w->right ||
+                 __w->right->color == __rb_tree_black) &&
+                (!__w->left ||
+                 __w->left->color == __rb_tree_black))
+            {
+              __w->color = __rb_tree_red;
+              r = r_parent;
+              r_parent = r_parent->parent;
+            }
+            else
+            {
+              if (!__w->left ||
+                  __w->left->color == __rb_tree_black)
+              {
+                if (__w->right)
+                  __w->right->color = __rb_tree_black;
+                __w->color = __rb_tree_red;
+                __rb_tre_rotate_left(__w, root);
+                __w = r_parent->left;
+              }
+              __w->color = r_parent->color;
+              r_parent->color = __rb_tree_black;
+              if (__w->left)
+                __w->left->color = __rb_tree_black;
+              __rb_tre_rotate_right(r_parent, root);
+              break;
+            }
+          }
+        if (r)
+          r->color = __rb_tree_black;
+      }
+      return d;
     }
   };
 }
