@@ -1,5 +1,5 @@
-#ifndef ZFWSTL_SLIST_H_
-#define ZFWSTL_SLIST_H_
+#ifndef ZFWSTL_SET_H_
+#define ZFWSTL_SET_H_
 /**
  * set集合: key即value
  * 底层迭代器：const iterator，也就是不能修改集合中插入的元素
@@ -20,6 +20,8 @@ namespace zfwstl
     // 注意，key与value使用同一个比较函数
     typedef Compare key_compare;
     typedef Compare value_compare;
+
+  private:
     typedef rb_tree<key_type, value_type, zfwstl::identity<value_type>, key_compare> rep_type;
     rep_type t; // 采用红黑树表现set
 
@@ -52,8 +54,10 @@ namespace zfwstl
   public:
     key_compare key_comp() const { return t.key_comp(); }
     value_compare value_comp() const { return t.key_comp(); }
-    iterator begin() const { return t.begin(); }
-    iterator end() const { return t.end(); }
+    const_iterator begin() const { return t.begin(); }
+    const_iterator end() const { return t.end(); }
+    iterator begin() { return t.begin(); }
+    iterator end() { return t.end(); }
     iterator rend() { return t.rend(); }
     iterator rbegin() { return t.rbegin(); }
     bool empty() { return t.empty(); }
@@ -75,10 +79,11 @@ namespace zfwstl
     //   typedef typename rep_type::iterator rep_iterator;
     //   return t.insert_unique((rep_iterator &)position, x);
     // }
-    // typename<class InputIter> void insert(InputIter first, InputIter last)
-    // {
-    //   t.insert_unique(first, last);
-    // }
+    template <class InputIter>
+    void insert(InputIter first, InputIter last)
+    {
+      t.insert_unique(first, last);
+    }
     void erase(iterator position)
     {
       typedef typename rep_type::iterator rep_iterator;
@@ -88,6 +93,7 @@ namespace zfwstl
     {
       return t.erase(x);
     }
+    void erase(iterator first, iterator last) { t.erase(first, last); }
 
     iterator find(const key_type &x) const { return t.find(x); }
     size_type count(const key_type &x) const { return t.count(x); }
@@ -136,4 +142,4 @@ namespace zfwstl
   }
 }
 
-#endif // !ZFWSTL_SLIST_H_
+#endif // !ZFWSTL_SET_H_

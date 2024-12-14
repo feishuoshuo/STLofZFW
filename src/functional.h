@@ -66,6 +66,15 @@ namespace zfwstl
     T operator()(const T &x) const { return -x; }
   };
 
+  template <typename Pair>
+  struct select1st : public unarg_function<Pair, typename Pair::first_type>
+  {
+    typename Pair::first_type &operator()(const Pair &pair) const
+    {
+      return pair.first;
+    }
+  };
+
   // 证同元素
   template <class T>
   struct identity : public unarg_function<T, T>

@@ -161,6 +161,7 @@ namespace zfwstl
     }
   };
   //===============================rb_tree==========================
+  // KeyOfValue用于从值类型中提取Key
   template <class Key, class Value, class KeyOfValue, class Compare /* ,class Alloc=alloc */>
   class rb_tree
   {
@@ -289,6 +290,28 @@ namespace zfwstl
 
     iterator find(const Key &k)
     {
+      auto y = header;
+      auto x = root();
+      while (x)
+      {
+        if (!key_compare(key(x), k))
+        {
+          // key 小于等于 x 键值，向左走
+          /**
+           * 这里的逗号,用于在if语句的代码块中分隔两个语句。
+           * 在C++中，逗号运算符会顺序执行两个表达式，并返回最后一个表达式的结果。
+           * 在这个上下文中，逗号运算符被用来同时更新y和x的值。
+           */
+          y = x, x = x->left;
+        }
+        else // key 大于 x 键值，向右走
+          x = right(x);
+      }
+      iterator j = iterator(y);
+      return (j == end() || key_compare(k, key(j.node))) ? end() : j;
+    }
+    const_iterator find(const Key &k) const
+    {
       link_type y = header;
       link_type x = root();
       while (x)
@@ -306,7 +329,7 @@ namespace zfwstl
         else // key 大于 x 键值，向右走
           x = right(x);
       }
-      iterator j = iterator(y);
+      const_iterator j = const_iterator(y);
       return (j == end() || key_compare(k, key(j.node))) ? end() : j;
     }
     void clear()
