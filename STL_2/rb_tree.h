@@ -440,7 +440,24 @@ namespace zfwstl
       }
       return __insert(x, y, v); // x新插入点，y插入点父节点，v新值
     }
-
+    void insert_equal(const_iterator __first, const_iterator __last)
+    {
+      for (; __first != __last; ++__first)
+        insert_equal(*__first);
+    }
+    void insert_equal(iterator __first, iterator __last)
+    {
+      for (; __first != __last; ++__first)
+        insert_equal(*__first);
+    }
+    template <class InputIterator>
+    void insert_equal(InputIterator first, InputIterator last)
+    {
+      size_type n = zfwstl::distance(first, last);
+      THROW_LENGTH_ERROR_IF(node_count > max_size() - n, "rb_tree<T, Comp>'s size too big");
+      for (; n > 0; --n, ++first)
+        insert_equal(*first);
+    }
     //==========================
     size_type count(const key_type &k) const
     {

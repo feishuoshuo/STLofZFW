@@ -19,7 +19,7 @@ namespace zfwstl
     typedef Key key_type;
     typedef T data_type;
     typedef T mapped_type;
-    typedef std::pair<const Key, T> value_type;
+    typedef std::pair<const Key, T> value_type; // value是可以之后修改的，但是key！！不行
     typedef Compare key_compare;
     // TAG: 嵌套类，以下定义一个functor比较函数对象，其作用就是调用 "元素比较函数"
     class value_compare : public binary_function<value_type, value_type, bool>

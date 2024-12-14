@@ -17,14 +17,14 @@ int main()
   simap["f18"] = 2;
   simap["e23"] = 3;
   simap["a34"] = 4;
-
+  simap["e23"] = 10;
   // std::pair<int, int> value(10, 5);
   // simap.insert(value);
   zfwstl::map<std::string, int>::const_iterator ite1 = simap.begin();
   zfwstl::map<std::string, int>::const_iterator ite2 = simap.end();
   for (; ite1 != ite2; ++ite1)
   {
-    std::cout << (*ite1).first << " ";
+    std::cout << (*ite1).first << "=" << (*ite1).second << " ";
   }
   std::cout << std::endl;
 
