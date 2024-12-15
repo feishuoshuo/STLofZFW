@@ -1,6 +1,7 @@
 #include "../STL_2/set.h"
 #include "../STL_2/map.h"
 #include <iostream>
+#include <string>
 int main()
 {
   /**

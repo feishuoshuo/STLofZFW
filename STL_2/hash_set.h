@@ -1,18 +1,17 @@
-#ifndef ZFWSTL_SLIST_H_
-#define ZFWSTL_SLIST_H_
+#ifndef ZFWSTL_HASH_SET_H_
+#define ZFWSTL_HASH_SET_H_
 /**
- * 栈(FILO先进后出)
- * 属于container adapter
+ * hash_set
  */
 #include <cstddef> //for size_t, ptrdiff_t
 namespace zfwstl
 {
 
   template <class T>
-  class slist
+  class hash_set
   {
   };
 
 }
 
-#endif // !ZFWSTL_SLIST_H_
+#endif // !ZFWSTL_HASH_SET_H_
