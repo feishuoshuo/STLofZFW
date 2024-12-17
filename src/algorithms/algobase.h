@@ -2,6 +2,7 @@
 #define ZFWSTL_ALGOBASE_H_
 #include <type_traits> // for enable_if()
 #include <cstring>     //for memset(), memmove()
+#include "../util.h"   //for move()
 #include "../iterator.h"
 namespace zfwstl
 {
@@ -150,6 +151,58 @@ namespace zfwstl
 
   // ===========================move===========================
   // 把 [first, last)区间内的元素移动到 [result, result + (last - first))内
+  // input_iterator_tag 版本
+  template <class InputIter, class OutputIter>
+  OutputIter
+  unchecked_move_cat(InputIter first, InputIter last, OutputIter result,
+                     zfwstl::input_iterator_tag)
+  {
+    for (; first != last; ++first, ++result)
+    {
+      *result = zfwstl::move(*first);
+    }
+    return result;
+  }
+
+  // ramdom_access_iterator_tag 版本
+  template <class RandomIter, class OutputIter>
+  OutputIter
+  unchecked_move_cat(RandomIter first, RandomIter last, OutputIter result,
+                     zfwstl::random_access_iterator_tag)
+  {
+    for (auto n = last - first; n > 0; --n, ++first, ++result)
+    {
+      *result = zfwstl::move(*first);
+    }
+    return result;
+  }
+
+  template <class InputIter, class OutputIter>
+  OutputIter
+  unchecked_move(InputIter first, InputIter last, OutputIter result)
+  {
+    return unchecked_move_cat(first, last, result, iterator_category(first));
+  }
+
+  // 为 trivially_copy_assignable 类型提供特化版本
+  template <class Tp, class Up>
+  typename std::enable_if<
+      std::is_same<typename std::remove_const<Tp>::type, Up>::value &&
+          std::is_trivially_move_assignable<Up>::value,
+      Up *>::type
+  unchecked_move(Tp *first, Tp *last, Up *result)
+  {
+    const size_t n = static_cast<size_t>(last - first);
+    if (n != 0)
+      std::memmove(result, first, n * sizeof(Up));
+    return result + n;
+  }
+
+  template <class InputIter, class OutputIter>
+  OutputIter move(InputIter first, InputIter last, OutputIter result)
+  {
+    return unchecked_move(first, last, result);
+  }
 
   // ===========================move_backward===========================
   // 将 [first, last)区间内的元素移动到 [result - (last - first), result)内
@@ -224,14 +277,145 @@ namespace zfwstl
   }
 
   // ===========================lexicographical_compare===========================
-  // 以字典序排列对两个序列进行比较，当在某个位置发现第一组不相等元素时，有下列几种情况：
-  // (1)如果第一序列的元素较小，返回 true ，否则返回 false
-  // (2)如果到达 last1 而尚未到达 last2 返回 true
-  // (3)如果到达 last2 而尚未到达 last1 返回 false
-  // (4)如果同时到达 last1 和 last2 返回 false
+  /**
+   *以字典序排列对两个序列进行比较，当在某个位置发现第一组不相等元素时，有下列几种情况：
+    (1)如果第一序列的元素较小，返回 true ，否则返回 false
+    (2)如果到达 last1 而尚未到达 last2 返回 true
+    (3)如果到达 last2 而尚未到达 last1 返回 false
+    (4)如果同时到达 last1 和 last2 返回 false
+   * */
 
   // ===========================mismatch===========================
   // 平行比较两个序列，找到第一处失配的元素，返回一对迭代器，分别指向两个序列中失配的元素
+
+  //=========================lower_bound=================================
+  /**
+   * 使用lower_bound()，序列需先排序
+   * 在[first, last)中查找第一个不小于 value 的元素，并返回指向它的迭代器，若没有则返回 last
+   */
+  // lbound_dispatch 的 forward_iterator_tag 版本
+  template <class ForwardIter, class T>
+  ForwardIter
+  lbound_dispatch(ForwardIter first, ForwardIter last,
+                  const T &value, forward_iterator_tag)
+  {
+    auto len = zfwstl::distance(first, last);
+    auto half = len;
+    ForwardIter middle;
+    while (len > 0)
+    {
+      half = len >> 1;
+      middle = first;
+      zfwstl::advance(middle, half);
+      if (*middle < value)
+      {
+        first = middle;
+        ++first;
+        len = len - half - 1;
+      }
+      else
+      {
+        len = half;
+      }
+    }
+    return first;
+  }
+
+  // lbound_dispatch 的 random_access_iterator_tag 版本
+  template <class RandomIter, class T>
+  RandomIter
+  lbound_dispatch(RandomIter first, RandomIter last,
+                  const T &value, random_access_iterator_tag)
+  {
+    auto len = last - first;
+    auto half = len;
+    RandomIter middle;
+    while (len > 0)
+    {
+      half = len >> 1;
+      middle = first + half;
+      if (*middle < value)
+      {
+        first = middle + 1;
+        len = len - half - 1;
+      }
+      else
+      {
+        len = half;
+      }
+    }
+    return first;
+  }
+
+  template <class ForwardIter, class T>
+  ForwardIter
+  lower_bound(ForwardIter first, ForwardIter last, const T &value)
+  {
+    return zfwstl::lbound_dispatch(first, last, value, iterator_category(first));
+  }
+
+  // 重载版本使用函数对象 comp 代替比较操作
+  // lbound_dispatch 的 forward_iterator_tag 版本
+  template <class ForwardIter, class T, class Compared>
+  ForwardIter
+  lbound_dispatch(ForwardIter first, ForwardIter last,
+                  const T &value, forward_iterator_tag, Compared comp)
+  {
+    auto len = zfwstl::distance(first, last);
+    auto half = len;
+    ForwardIter middle;
+    while (len > 0)
+    {
+      half = len >> 1;
+      middle = first;
+      zfwstl::advance(middle, half);
+      if (comp(*middle, value))
+      {
+        first = middle;
+        ++first;
+        len = len - half - 1;
+      }
+      else
+      {
+        len = half;
+      }
+    }
+    return first;
+  }
+
+  // lbound_dispatch 的 random_access_iterator_tag 版本
+  template <class RandomIter, class T, class Compared>
+  RandomIter
+  lbound_dispatch(RandomIter first, RandomIter last,
+                  const T &value, random_access_iterator_tag, Compared comp)
+  {
+    auto len = last - first;
+    auto half = len;
+    RandomIter middle;
+    while (len > 0)
+    {
+      half = len >> 1;
+      middle = first + half;
+      if (comp(*middle, value))
+      {
+        first = middle + 1;
+        len = len - half - 1;
+      }
+      else
+      {
+        len = half;
+      }
+    }
+    return first;
+  }
+
+  template <class ForwardIter, class T, class Compared>
+  ForwardIter
+  lower_bound(ForwardIter first, ForwardIter last, const T &value, Compared comp)
+  {
+    return zfwstl::lbound_dispatch(first, last, value, iterator_category(first), comp);
+  }
+
 }
 
 #endif // !ZFWSTL_ALGOBASE_H_

@@ -6,8 +6,8 @@
  */
 #include <cstddef>                       //for size_t, ptrdiff_t
 #include "../src/memory/allocator.h"     //标准空间配置器
-#include "../src/exceptdef.h"            //for 宏MYSTL_DEBUG
-#include "../src/memory/unintialized.h"  //for uninitialized_fill_n() uninitialized_copy()
+#include "../src/exceptdef.h"            //for 宏MYSTL_DEBUG, THROW_LENGTH_ERROR_IF
+#include "../src/memory/unintialized.h"  //for uninitialized_fill_n() uninitialized_copy(), uninitialized_move()
 #include "../src/algorithms/algorithm.h" //for max(), copy_backward(), fill(), copy()
 #include "../src/iterator.h"             // for iterator_category()萃取迭代器类型, distance(), advance(), is_input_iterator
 namespace zfwstl
@@ -126,6 +126,22 @@ namespace zfwstl
     size_type size() const { return static_cast<size_type>(end() - begin()); }    // 返回容器中当前元素的数量
     size_type max_size() const { return static_cast<size_type>(-1) / sizeof(T); } // 返回容器可能容纳的最大元素数量的理论上限
     size_type capacity() const { return static_cast<size_type>(end_of_storage - begin()); }
+    // 调整容量以至少能够容纳 n 个元素
+    void reserve(size_type n)
+    {
+      if (capacity() < n) // 会导致容器重新分配其存储空间，以增加其容量至 n 或更大
+      {
+        THROW_LENGTH_ERROR_IF(n > max_size(),
+                              "n can not larger than max_size() in vector<T>::reserve(n)");
+        const auto old_size = size();
+        auto tmp = data_allocator::allocate(n);
+        zfwstl::uninitialized_move(start, finish, tmp);
+        data_allocator::deallocate(start, end_of_storage - start);
+        start = tmp;
+        finish = tmp + old_size;
+        end_of_storage = start + n;
+      }
+    }
     bool empty() const { return (begin() == end()); }
     // 访问元素相关操作
     reference front()
@@ -153,7 +169,7 @@ namespace zfwstl
       MYSTL_DEBUG(n < size());
       return *(begin() + n);
     }
-    reference operator[](size_type n) const
+    const_reference operator[](size_type n) const
     {
       MYSTL_DEBUG(n < size());
       return *(begin() + n);
@@ -187,10 +203,10 @@ namespace zfwstl
       }
     }
     // 指定位置插入 n 个元素，元素初值 = x
-    iterator insert(iterator position, size_type n, const value_type &x)
+    void insert(iterator position, size_type n, const value_type &x)
     {
       if (n == 0)
-        return position;
+        return;
       if (size_type(end_of_storage - finish) >= n)
       {
         // 1-备用空间 >= 新增元素个数
@@ -277,14 +293,14 @@ namespace zfwstl
     // 清空容器
     void clear() { erase(begin(), end()); }
     // 与另一个 vector 交换
-    void swap(vector<T> &rhs) noexcept
+    void swap(vector<T> &rhs)
     {
       if (this != &rhs)
       {
         // 直接交换指针即可
-        swap(start, rhs.start);
-        swap(finish, rhs.finish);
-        swap(end_of_storage, rhs.end_of_storage);
+        zfwstl::swap(start, rhs.start);
+        zfwstl::swap(finish, rhs.finish);
+        zfwstl::swap(end_of_storage, rhs.end_of_storage);
       }
     }
     // 重置容器大小

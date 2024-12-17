@@ -4,6 +4,7 @@
 #include <type_traits>               //for is_trivially_copy_assignable, true_type, false_type
 #include "construct.h"               // for construct(), destroy()
 #include "../algorithms/algorithm.h" //for algobase.h 's fill_n(), fill()
+#include "../algorithms/algobase.h"  //for move()
 namespace zfwstl
 {
   // =====================uninitialized_copy=================================
@@ -115,6 +116,42 @@ namespace zfwstl
                                           std::is_trivially_copy_assignable<
                                               typename iterator_traits<ForwardIter>::
                                                   value_type>{});
+  }
+  //=====================uninitialized_move=====================
+  // 把[first, last)上的内容移动到以 result 为起始处的空间，返回移动结束的位置
+  template <class InputIter, class ForwardIter>
+  ForwardIter
+  unchecked_uninit_move(InputIter first, InputIter last, ForwardIter result, std::true_type)
+  {
+    return zfwstl::move(first, last, result);
+  }
+
+  template <class InputIter, class ForwardIter>
+  ForwardIter
+  unchecked_uninit_move(InputIter first, InputIter last, ForwardIter result, std::false_type)
+  {
+    ForwardIter cur = result;
+    try
+    {
+      for (; first != last; ++first, ++cur)
+      {
+        zfwstl::construct(&*cur, zfwstl::move(*first));
+      }
+    }
+    catch (...)
+    {
+      zfwstl::destroy(result, cur);
+    }
+    return cur;
+  }
+
+  template <class InputIter, class ForwardIter>
+  ForwardIter uninitialized_move(InputIter first, InputIter last, ForwardIter result)
+  {
+    return zfwstl::unchecked_uninit_move(first, last, result,
+                                         std::is_trivially_move_assignable<
+                                             typename iterator_traits<InputIter>::
+                                                 value_type>{});
   }
 }
 #endif // !ZFWSTLSTL_UNINTIALIZED_H_
