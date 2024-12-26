@@ -10,8 +10,8 @@ namespace zfwstl
   template <class Arg, class Result>
   struct unarg_function
   {
-    typedef Arg argument_type;
-    typedef Result result_type;
+    typedef Arg argument_type;  // 函数参数型别
+    typedef Result result_type; // 传回值型别
   };
 
   // 定义二元函数的参数型别的返回值型别
@@ -24,6 +24,9 @@ namespace zfwstl
   };
 
   //==========================函数对象===========================
+  /**
+   * functor-arithmetic 算术类仿函数
+   */
   // 加法
   template <class T>
   struct plus : public binary_function<T, T, T>
@@ -66,6 +69,16 @@ namespace zfwstl
     T operator()(const T &x) const { return -x; }
   };
 
+  // ======证同元素================
+  // 典型案例：RB-tree所需的KeyOfValue op, set进行实现
+  template <class T>
+  struct identity : public unarg_function<T, T>
+  {
+    const T &operator()(const T &x) const { return x; }
+  };
+
+  // 选择函数(selection function):接受一个pair，传回其第一个元素
+  // 典型案例：RB-tree所需的KeyOfValue op, map进行实现
   template <typename Pair>
   struct select1st : public unarg_function<Pair, typename Pair::first_type>
   {
@@ -75,11 +88,14 @@ namespace zfwstl
     }
   };
 
-  // 证同元素
-  template <class T>
-  struct identity : public unarg_function<T, T>
+  // 选择函数(selection function):接受一个pair，传回其第二个元素
+  template <typename Pair>
+  struct select2nd : public unarg_function<Pair, typename Pair::second_type>
   {
-    const T &operator()(const T &x) const { return x; }
+    typename Pair::second_type &operator()(const Pair &pair) const
+    {
+      return pair.second;
+    }
   };
 
   // 加法的证同元素
@@ -90,6 +106,24 @@ namespace zfwstl
   template <class T>
   T identity_element(multiplies<T>) { return T(1); }
 
+  //======投射函数================
+  // 投射函数:传回第一参数，忽略第二参数
+  template <typename Arg1, typename Arg2>
+  struct project1st : public binary_function<Arg1, Arg2, Arg1>
+  {
+    Arg1 operator()(const Arg1 &x, const Arg2 &) const { return x; }
+  };
+
+  // 投射函数:传回第二参数，忽略第一参数
+  template <typename Arg1, typename Arg2>
+  struct project1st : public binary_function<Arg1, Arg2, Arg2>
+  {
+    Arg2 operator()(const Arg1 &, const Arg2 &y) const { return y; }
+  };
+
+  /**
+   * functor-rational 关系运算类仿函数
+   */
   // 等于
   template <class T>
   struct equal_to : public binary_function<T, T, bool>
@@ -132,6 +166,9 @@ namespace zfwstl
     bool operator()(const T &x, const T &y) const { return x <= y; }
   };
 
+  /**
+   * functor-logical 逻辑运算类仿函数
+   */
   // 逻辑与
   template <class T>
   struct logical_and : public binary_function<T, T, bool>
