@@ -8,8 +8,10 @@
 #include <cstddef>                       //for size_t, ptrdiff_t
 #include "../src/memory/allocator.h"     //标准空间配置器
 #include "../src/algorithms/algorithm.h" //for max(), copy(), copy_backward()
-#include "../src/memory/unintialized.h"  //for uninitialized_fill()
+#include "../src/memory/unintialized.h"  //for uninitialized_fill(), uninitialized_copy()
 #include "../src/exceptdef.h"            //for MYSTL_DEBUG, THROW_OUT_OF_RANGE_IF
+#include "../src/iterator.h"             //for reverse_iterator, distance, is_input_iterator
+#include "../src/util.h"                 //for forward
 namespace zfwstl
 {
   // deque map 初始化的大小
@@ -25,7 +27,7 @@ namespace zfwstl
   };
 
   template <class T, class Ref, class Ptr, size_t BufSize>
-  struct __deque_iterator
+  struct __deque_iterator : public iterator<random_access_iterator_tag, T>
   {
     typedef __deque_iterator<T, T &, T *, BufSize> iterator;
     typedef __deque_iterator<T, const T &, const T *, BufSize> const_iterator;
@@ -176,9 +178,8 @@ namespace zfwstl
 
     typedef __deque_iterator<T, T &, T *, BufSize> iterator;
     typedef __deque_iterator<T, const T &, const T *, BufSize> const_iterator;
-    // TODO:以后可以添加反向迭代器
-    // typedef mystl::reverse_iterator<iterator> reverse_iterator;
-    // typedef mystl::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef zfwstl::reverse_iterator<iterator> reverse_iterator;
+    typedef zfwstl::reverse_iterator<const_iterator> const_reverse_iterator;
 
   protected:
     iterator start;  // 指向第一个节点
@@ -195,6 +196,8 @@ namespace zfwstl
     deque() { fill_initialize(0, value_type()); }
     // TAG：以防止类的构造函数参与隐式类型转换。当一个构造函数被声明为 explicit 时，这意味着它不能用于隐式转换，只能用于直接的函数调用和显式构造
     explicit deque(size_type n) { fill_initialize(n, value_type()); }
+    template <class IIter, typename std::enable_if<zfwstl::is_input_iterator<IIter>::value, int>::type = 0>
+    deque(IIter first, IIter last) { copy_init(first, last, iterator_category(first)); }
     deque(int n, const value_type &value) { fill_initialize(n, value); }
     ~deque()
     {
@@ -224,6 +227,14 @@ namespace zfwstl
     {
       return finish;
     }
+    reverse_iterator rbegin() noexcept
+    {
+      auto tmp = reverse_iterator(end());
+      return reverse_iterator(end());
+    }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const noexcept { return reverse_iterator(end()); }
+    const_reverse_iterator rend() const noexcept { return reverse_iterator(begin()); }
     const_iterator cbegin() const noexcept
     {
       return begin();
@@ -316,6 +327,23 @@ namespace zfwstl
     }
     void assign();
     void emplace();
+    // NOTE: Args &&...args：这是一个可变参数模板，它允许函数接受任意数量和类型的参数。
+    //  && 表示参数通过右值引用传递，这允许完美转发，即保持参数的左值/右值属性
+    template <class... Args>
+    void emplace_back(Args &&...args)
+    {
+      if (finish.cur != finish.last - 1)
+      {
+        data_allocator::construct(finish.cur, zfwstl::forward<Args>(args)...);
+        ++finish.cur;
+      }
+      else
+      {
+        reserve_map_at_back();
+        data_allocator::construct(finish.cur, zfwstl::forward<Args>(args)...);
+        ++finish;
+      }
+    }
     void push_back(const value_type &x)
     {
       if (finish.cur == (finish.last - 1))
@@ -491,6 +519,29 @@ namespace zfwstl
         // NOTE:因为最后一个map中控节点指向的buffer缓冲区可能会有备用空间未使用，不能将这部分初始化
         zfwstl::uninitialized_fill(finish.first, finish.cur, x);
       }
+    }
+    // copy_init 函数
+    template <class IIter>
+    void copy_init(IIter first, IIter last, input_iterator_tag)
+    {
+      const size_type n = zfwstl::distance(first, last);
+      create_map_and_nodes(n);
+      for (; first != last; ++first)
+        emplace_back(*first);
+    }
+    template <class FIter>
+    void copy_init(FIter first, FIter last, forward_iterator_tag)
+    {
+      const size_type n = zfwstl::distance(first, last);
+      create_map_and_nodes(n);
+      for (auto cur = start.node; cur < finish.node; ++cur)
+      {
+        auto next = first;
+        zfwstl::advance(next, start.buffer_size);
+        zfwstl::uninitialized_copy(first, next, *cur);
+        first = next;
+      }
+      zfwstl::uninitialized_copy(first, last, finish.first);
     }
     // 只有当最后一个缓冲区只剩一个备用元素空间时才会调用
     void push_back_aux(const value_type &x)

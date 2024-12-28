@@ -5,6 +5,7 @@
  */
 #include <cstddef>       // for ptrdiff_t
 #include "type_traits.h" //for m_bool_constant
+#include <iostream>
 namespace zfwstl
 {
   // 五种迭代器类型
@@ -272,9 +273,280 @@ namespace zfwstl
   {
     __advance(i, n, iterator_category(i));
   }
+  //=====================iterator adapters迭代器配接器=====================
+  /**
+   * Insert Iterators
+   * 用来将某个迭代器的赋值(assign)操作修改为插入(insert)操作
+   * 1. back_insert从容器尾端插入
+   * 2. front_insert从容器头部插入
+   * 3. insert_iterator在指定位置上进行，插入后将迭代器右移一个位置
+   */
+  template <class Container>
+  class back_insert_iterator
+  {
+  protected:
+    Container *container; // 底层容器
+  public:
+    typedef output_iterator_tag iterator_category; // 注意类型
+    typedef void value_type;
+    typedef void difference_type;
+    typedef void pointer;
+    typedef void reference;
 
-  // 模板类 : reverse_iterator
-  // TODO:代表反向迭代器，使前进为后退，后退为前进
+    // 该构造函数使 back_insert_iterator 与容器绑定起来！！
+    explicit back_insert_iterator(Container &x) : container(&x) {}
+    back_insert_iterator<Container> &operator=(const typename Container::value_type &value)
+    {
+      container->push_back(value); // 关键！转而调用push_back()
+      return *this;
+    }
+    // NOTE: Insert Iterators的前进、后退、取值、成员取用等操作都是没有意义的，甚至不被允许
+    //(关闭功能)，均返回对象自己
+    back_insert_iterator<Container> &operator*() { return *this; }
+    back_insert_iterator<Container> &operator++() { return *this; }
+    back_insert_iterator<Container> &operator++(int) { return *this; }
+  };
+
+  template <class Container>
+  class front_insert_iterator
+  {
+  protected:
+    Container *container; // 底层容器
+  public:
+    typedef output_iterator_tag iterator_category; // 注意类型
+    typedef void value_type;
+    typedef void difference_type;
+    typedef void pointer;
+    typedef void reference;
+
+    explicit front_insert_iterator(Container &x) : container(&x) {}
+    front_insert_iterator<Container> &operator=(const typename Container::value_type &value)
+    {
+      container->push_front(value); // 关键！转而调用push_front()
+      return *this;
+    }
+    // Insert Iterators的前进、后退、取值、成员取用等操作都是没有意义的，甚至不被允许
+    //(关闭功能)，均返回对象自己
+    front_insert_iterator<Container> &operator*() { return *this; }
+    front_insert_iterator<Container> &operator++() { return *this; }
+    front_insert_iterator<Container> &operator++(int) { return *this; }
+  };
+
+  template <class Container>
+  class insert_iterator
+  {
+  protected:
+    Container *container; // 底层容器
+    typename Container::iterator iter;
+
+  public:
+    typedef output_iterator_tag iterator_category; // 注意类型
+    typedef void value_type;
+    typedef void difference_type;
+    typedef void pointer;
+    typedef void reference;
+
+    insert_iterator(Container &x, typename Container::iterator i) : container(&x), iter(i) {}
+    insert_iterator<Container> &operator=(const typename Container::value_type &value)
+    {
+      iter = container->insert(iter, value); // 关键！！转调用insert()
+      ++iter;                                // ！！使得insert iterator永远随1其目标贴身移动
+      return *this;
+    }
+    // Insert Iterators的前进、后退、取值、成员取用等操作都是没有意义的，甚至不被允许
+    //(关闭功能)，均返回对象自己
+    insert_iterator<Container> &operator*() { return *this; }
+    insert_iterator<Container> &operator++() { return *this; }
+    insert_iterator<Container> &operator++(int) { return *this; }
+  };
+
+  // 辅助函数，帮助我们方便使用insert_iterator相关迭代器配置器
+  template <class Container>
+  inline back_insert_iterator<Container> back_inserter(Container &x) { return back_insert_iterator<Container>(x); }
+
+  template <class Container>
+  inline front_insert_iterator<Container> front_inserter(Container &x) { return front_insert_iterator<Container>(x); }
+
+  template <class Container, class Iterator>
+  inline insert_iterator<Container> inserter(Container &x, Iterator i)
+  {
+    typedef typename Container::iterator iter;
+    return insert_iterator<Container>(x, iter(i)); // iter(i)隐式迭代器的类型转换
+  }
+
+  /**
+   * Reverse Iterators
+   * 代表反向迭代器，使前进为后退，后退为前进
+   */
+  template <class Iterator>
+  class reverse_iterator
+  {
+  protected:
+    Iterator current; // 记录对应之正向迭代器
+  public:
+    // 反向迭代器的五种相应型别, 都和其对应的正向迭代器相同
+    typedef typename iterator_traits<Iterator>::iterator_category iterator_category;
+    typedef typename iterator_traits<Iterator>::value_type value_type;
+    typedef typename iterator_traits<Iterator>::difference_type difference_type;
+    typedef typename iterator_traits<Iterator>::pointer pointer;
+    typedef typename iterator_traits<Iterator>::reference reference;
+
+    typedef Iterator iterator_type;          // 代表正向迭代器
+    typedef reverse_iterator<Iterator> self; // 代表反向迭代器
+  public:
+    reverse_iterator() {}
+    // 下面构造函数将 reverse_iterator 与某个正向迭代器 x关联起来
+    explicit reverse_iterator(iterator_type x) : current(x) {}
+    reverse_iterator(const self &x) : current(x.current) {}
+
+    iterator_type base() const { return current; } // 取出对应的正向迭代器
+
+    reference operator*() const
+    {
+      Iterator tmp = current;
+      return *--tmp; //!!
+    }
+    pointer operator->() const { return &(operator*()); } // 同上
+    self &operator++()
+    {
+      --current;
+      return *this;
+    }
+    self &operator--()
+    {
+      ++current;
+      return *this;
+    }
+    self &operator++(int)
+    {
+      self tmp = *this;
+      --current;
+      return tmp;
+    }
+    self &operator--(int)
+    {
+      self tmp = *this;
+      ++current;
+      return tmp;
+    }
+    // 计算两个反向迭代器之间的距离
+    difference_type operator-(const reverse_iterator &rhs) const
+    {
+      // 因为反向迭代器的current成员变量是指向对应正向迭代器的，
+      // 所以直接计算两个正向迭代器之间的距离即可。
+      return this->current - rhs.current;
+    }
+    // 前进与后退方向完全逆转
+    // TAG: 这里的const是一个常量成员函数。这意味着函数不会修改类的任何成员变量，也就是说，它不会改变对象的状态
+    self operator+(difference_type n) const { return self(current - n); }
+    self operator-(difference_type n) const { return self(current + n); }
+    self operator+=(difference_type n)
+    {
+      current -= n;
+      return *this;
+    }
+    self operator-=(difference_type n)
+    {
+      current -= n;
+      return *this;
+    }
+    //(*this + n)回调哦那个本类的operator*和operator+; 最外面的*不会
+    reference operator[](difference_type n) const { return *(*this + n); }
+  };
+
+  /**
+   * IOStream Iterators
+   * 1. isteram iterator !!永远在最必要时，才定义一个isteram iterator
+   *    是一个 input iterator
+   * 2. ostream iterator
+   *    是一个 output iterator
+   */
+  template <class T, class Distance = ptrdiff_t>
+  class istream_iterator
+  {
+    friend bool operator==(const istream_iterator<T, Distance> &a, const istream_iterator<T, Distance> &b)
+    {
+      if (a.end_marker && b.end_marker)
+        return true; // 如果两个迭代器都到达了流的末尾，则它们相等
+      if (!a.end_marker && !b.end_marker)
+        return false; // 如果两个迭代器都未到达流的末尾，则它们不相等
+      return false;   // 一个到达了末尾而另一个没有，或者一个有效而另一个无效，则它们不相等
+    }
+    friend bool operator!=(const istream_iterator<T, Distance> &a, const istream_iterator<T, Distance> &b) { return !(a == b); }
+
+  protected:
+    std::istream *stream; // 内部维护了一个istream member
+    T value;
+    bool end_marker;
+
+    // 目的是用来检测流的结束或者读取错误，并读取数据
+    void read()
+    {
+      end_marker = (*stream) ? true : false;
+      if (end_marker)
+        *stream >> value; // ！！关键！！
+      // 上述输入之后，stream状态可能改变，所以下面再做一次以决定 end_marker
+      // 当读到eof或读到型别不符的资料，stream即处于false状态
+      end_marker = (*stream) ? true : false;
+    }
+
+  public:
+    typedef input_iterator_tag iterator_category;
+    typedef T value_type;
+    typedef Distance difference_type;
+    // 因此身为input iterator，所以采用const比较保险
+    typedef const T *pointer;
+    typedef const T &reference;
+
+    istream_iterator() : stream(&std::cin), end_marker(false) {}
+    istream_iterator(std::istream &s) : stream(&s) { read(); }
+
+    reference operator*() const { return value; }
+    pointer operator->() const { return &(operator*()); }
+    // 迭代器前进一个位置，就代表要读取一笔资料
+    istream_iterator<T, Distance> &operator++()
+    {
+      read();
+      return *this;
+    }
+    istream_iterator<T, Distance> &operator++(int)
+    {
+      istream_iterator<T, Distance> tmp = *this;
+      read();
+      return tmp;
+    }
+  };
+
+  template <class T>
+  class ostream_iterator
+  {
+    // friend bool operator==
+  protected:
+    std::ostream *stream; // 内部维护了一个ostream member
+    const char *string;   // 每次输出后的间隔符号，变量名称可以叫string!
+  public:
+    typedef output_iterator_tag iterator_category;
+    typedef void value_type;
+    typedef void difference_type;
+    typedef void pointer;
+    typedef void reference;
+
+    ostream_iterator(std::ostream &s) : stream(&std::cout), string(0) {}
+    // 下面构造函数用法例子：ostream_iterator<int> outiter(cout, ' ');
+    ostream_iterator(std::ostream &s, const char *c) : stream(&s), string(c) {}
+    // 对迭代器做赋值(assign)操作，就代表要输出一笔资料
+    ostream_iterator<T> &operator=(const T &value)
+    {
+      *stream << value; //!!关键！！输出数值
+      if (string)
+        *stream << string; // 如果输出状态无误，输出间隔符号
+      return *this;
+    }
+
+    ostream_iterator<T> &operator*() { return *this; }
+    ostream_iterator<T> &operator++() { return *this; }
+    ostream_iterator<T> &operator++(int) { return *this; }
+  };
 
 }
 #endif // !ZFWSTLSTL_TYPE_ITERATOR_H_

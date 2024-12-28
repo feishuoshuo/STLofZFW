@@ -9,7 +9,7 @@
 #include "../src/exceptdef.h"            //for 宏MYSTL_DEBUG, THROW_LENGTH_ERROR_IF
 #include "../src/memory/unintialized.h"  //for uninitialized_fill_n() uninitialized_copy(), uninitialized_move()
 #include "../src/algorithms/algorithm.h" //for max(), copy_backward(), fill(), copy()
-#include "../src/iterator.h"             // for iterator_category()萃取迭代器类型, distance(), advance(), is_input_iterator
+#include "../src/iterator.h"             // for reverse_iterator, iterator_category()萃取迭代器类型, distance(), advance(), is_input_iterator
 namespace zfwstl
 {
   template <class T /*,class Alloc=alloc*/>
@@ -31,9 +31,8 @@ namespace zfwstl
 
     typedef value_type *iterator;
     typedef const value_type *const_iterator;
-    // TODO:以后可以添加反向迭代器
-    //  typedef mystl::reverse_iterator<iterator> reverse_iterator;
-    //  typedef mystl::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef zfwstl::reverse_iterator<iterator> reverse_iterator;
+    typedef zfwstl::reverse_iterator<const_iterator> const_reverse_iterator;
 
     allocator_type get_allocator() { return data_allocator(); }
     template <class U>
@@ -111,13 +110,14 @@ namespace zfwstl
     // TODO:移动赋值操作符
     // =================vector数据结构的相关操作=====================
     // 迭代器相关操作
-    iterator begin()
-    {
-      return start;
-    }
+    iterator begin() { return start; }
     iterator end() { return finish; }
     const_iterator begin() const { return start; }
     const_iterator end() const { return finish; }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const noexcept { return reverse_iterator(end()); }
+    const_reverse_iterator rend() const noexcept { return reverse_iterator(begin()); }
     const_iterator cbegin() const { return begin(); }
     const_iterator cend() const { return end(); }
     // TODO:可以添加反向迭代器的相关操作

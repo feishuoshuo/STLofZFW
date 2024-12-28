@@ -42,5 +42,15 @@ int main()
   // itr = find(ideq.begin(), ideq.end(), 99);
   // std::cout << *itr << endl;
   // std::cout << *(itr.cur) << std::endl;
+
+  /**
+   * 测试reverse_iterator
+   */
+  zfwstl::deque<int>::reverse_iterator rite2(ideq.end());
+  std::cout << *(rite2) << std::endl;
+  std::cout << *(++ ++ ++rite2) << std::endl;
+  std::cout << *(--rite2) << std::endl;
+  std::cout << *(rite2.base()) << std::endl;
+  std::cout << rite2[3] << std::endl;
   return 0;
 }
