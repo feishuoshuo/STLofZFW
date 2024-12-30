@@ -116,7 +116,7 @@ namespace zfwstl
 
   // 投射函数:传回第二参数，忽略第一参数
   template <typename Arg1, typename Arg2>
-  struct project1st : public binary_function<Arg1, Arg2, Arg2>
+  struct project2nd : public binary_function<Arg1, Arg2, Arg2>
   {
     Arg2 operator()(const Arg1 &, const Arg2 &y) const { return y; }
   };

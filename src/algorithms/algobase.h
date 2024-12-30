@@ -4,6 +4,16 @@
 #include <cstring>     //for memset(), memmove()
 #include "../util.h"   //for move()
 #include "../iterator.h"
+/**
+ * 基本算法
+ * copy 复制 -if in-place
+ * copy_backeard 逆向复制 -if in-place
+ * copy_n * 复制n个元素 -if in-place
+ * equal 判断两个区间相等与否
+ * fill 改填元素值
+ * fill 改填元素值, n次
+ *
+ */
 namespace zfwstl
 {
 #ifdef max
