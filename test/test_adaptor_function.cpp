@@ -13,8 +13,8 @@ int main()
   zfwstl::vector<int> iv(ia, ia + 6);
 
   // 找出不小于12的元素个数
-  std::cout << count_if(iv.begin(), iv.end(),
-                        not1(bind2nd(less<int>(), 12)));
+  std::cout << zfwstl::count_if(iv.begin(), iv.end(),
+                                not1(bind2nd(less<int>(), 12)));
   std::cout << std::endl;
 
   // 令每个元素v执行(v+2)*3然后输往outite

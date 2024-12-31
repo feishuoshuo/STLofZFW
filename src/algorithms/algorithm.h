@@ -13,9 +13,9 @@
  */
 #include "algobase.h"
 // #include "algo.h"
-// #include "set_algo.h"
-// #include "heap_algo.h"
-// #include "numeric.h"
+#include "set_algo.h"
+#include "heap_algo.h"
+#include "numeric.h"
 /**
  * - _if结尾, 可接收仿函数进行比对行为
  * _copy结尾，表示将操作对象内容复制一份副本，然后在副本上进行下一步操作

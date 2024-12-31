@@ -6,9 +6,9 @@
  */
 #include <cstddef> //for size_t, ptrdiff_t
 #include "vector.h"
-#include "../src/functional.h" //for less
-#include "heap.h"              //for push_heap, pop_heap, sort_heap, make_heap
-#include "../src/iterator.h"   //for is_input_iterator
+#include "../src/functional.h"           //for less
+#include "../src/algorithms/heap_algo.h" //for push_heap, pop_heap, sort_heap, make_heap
+#include "../src/iterator.h"             //for is_input_iterator
 namespace zfwstl
 {
 

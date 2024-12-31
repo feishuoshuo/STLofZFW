@@ -1,6 +1,7 @@
 #ifndef ZFWSTL_ALGO_H_
 #define ZFWSTL_ALGO_H_
 #include <type_traits> // for enable_if()
+#include <cstring>     //for memmove()
 /**
  *
  * adjacent_find 查找相邻而重复(或符合某条件)的元素
