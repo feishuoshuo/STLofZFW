@@ -2,13 +2,14 @@
 #define ZFWSTL_ALGO_H_
 #include <type_traits> // for enable_if()
 #include <cstddef>
-#include <ctime>         // for time()
-#include <cstring>       // for memmove()
-#include "../iterator.h" // for XXX_iterator_tag, iterator_traits, reverse_iterator, distance(), advance()
-#include "../util.h"     // for pair, swap()
-#include "algobase.h"    // for iter_swap()
-#include "heap_algo.h"   // forpush_heap, pop_heap, sort_heap, make_heap
-#include <memory>        // for temporary_buffer
+#include <ctime>           // for time()
+#include <cstring>         // for memmove()
+#include "../iterator.h"   // for XXX_iterator_tag, iterator_traits, reverse_iterator, distance(), advance()
+#include "../util.h"       // for pair, swap()
+#include "../functional.h" // for equal_to
+#include "algobase.h"      // for iter_swap()
+#include "heap_algo.h"     // forpush_heap, pop_heap, sort_heap, make_heap
+#include <memory>          // for temporary_buffer
 /**
  * all_of、any_of、none_of
  * median 找出三个值的中间值
@@ -1545,7 +1546,7 @@ namespace zfwstl
     {
       if (*i < *first)
       {
-        zfwstl::__pop_heap_aux(first, middle, i, *i, distance_type(first));
+        zfwstl::__pop_heap_aux(first, middle, i);
       }
     }
     zfwstl::sort_heap(first, middle);
@@ -1561,7 +1562,7 @@ namespace zfwstl
     {
       if (comp(*i, *first))
       {
-        zfwstl::__pop_heap_aux(first, middle, i, *i, distance_type(first), comp);
+        zfwstl::__pop_heap_aux(first, middle, i, comp);
       }
     }
     zfwstl::sort_heap(first, middle, comp);

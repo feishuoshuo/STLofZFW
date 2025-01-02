@@ -12,7 +12,7 @@
  *         比较equal/mismatch, 寻找极值max/min等
  */
 #include "algobase.h"
-// #include "algo.h"
+#include "algo.h"
 #include "set_algo.h"
 #include "heap_algo.h"
 #include "numeric.h"
