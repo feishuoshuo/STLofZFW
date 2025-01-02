@@ -401,6 +401,14 @@ namespace zfwstl
 
     iterator_type base() const { return current; } // 取出对应的正向迭代器
 
+    bool operator==(const self &x) const
+    {
+      return this->current == x.current;
+    }
+    bool operator!=(const self &x) const
+    {
+      return this->current != x.current;
+    }
     reference operator*() const
     {
       Iterator tmp = current;

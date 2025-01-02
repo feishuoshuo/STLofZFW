@@ -6,8 +6,8 @@
  * 底层数据结构：使用array实现完全二叉树(complete binary tree)
  * heap 的四个算法: push_heap, pop_heap, sort_heap, make_heap
  */
-#include <cstddef>           //for size_t, ptrdiff_t
-#include "../src/iterator.h" //for distance_type
+#include <cstddef>       //for size_t, ptrdiff_t
+#include "../iterator.h" //for distance_type
 namespace zfwstl
 {
 
