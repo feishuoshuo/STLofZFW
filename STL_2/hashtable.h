@@ -10,8 +10,8 @@
 #include "../src/memory/allocator.h" //simple_allocator标准空间支配其
 #include "../src/memory/construct.h"
 #include "../STL/vector.h"
-#include "../src/algorithms/algobase.h" //for lower_bound
-#include "../src/util.h"                //make_pair
+#include "../src/algorithms/algorithm.h" //for lower_bound
+#include "../src/util.h"                 //make_pair, move, pair
 namespace zfwstl
 {
   /**
@@ -49,7 +49,7 @@ namespace zfwstl
     hashtable *ht; // 保持对容器的连结关系(因为可能需要从bucket到另一个bucket)
     __hashtable_iterator(node *n, hashtable *tab) : cur(n), ht(tab) {}
     __hashtable_iterator() {}
-    __hashtable_iterator(iterator &it) : cur(it.cur), ht(it.ht) {}
+    __hashtable_iterator(const iterator &it) : cur(it.cur), ht(it.ht) {}
     reference operator*() const { return cur->val; }
     pointer operator->() const { return &(operator*()); }
     // 其前进操作是首先尝试从目前所指结点出发，前进一个位置
@@ -240,7 +240,7 @@ namespace zfwstl
     // 查找键值为 key 的节点，返回其迭代器
     iterator find(const key_type &key)
     {
-      const auto n = hash(key);
+      const auto n = hashf(key);
       node *first = buckets[n];
       for (; first && !equals(get_key(first->val), key); first = first->next)
       {
@@ -249,7 +249,7 @@ namespace zfwstl
     }
     const_iterator find(const key_type &key) const
     {
-      const auto n = hash(key);
+      const auto n = hashf(key);
       node *first = buckets[n];
       for (; first && !equals(get_key(first->val), key); first = first->next)
       {
@@ -258,7 +258,7 @@ namespace zfwstl
     }
     size_type count(const key_type &key) const
     {
-      const auto n = hash(key);
+      const auto n = hashf(key);
       size_type result = 0;
       for (node *cur = buckets[n]; cur; cur = cur->next)
       {
@@ -269,7 +269,7 @@ namespace zfwstl
     }
     zfwstl::pair<iterator, iterator> equal_range_unique(const key_type &key)
     {
-      const auto n = hash(key);
+      const auto n = hashf(key);
       for (node *first = buckets[n]; first; first = first->next)
       {
         if (equals(get_key(first->val), key))
@@ -288,7 +288,7 @@ namespace zfwstl
     }
     zfwstl::pair<const_iterator, const_iterator> equal_range_unique(const key_type &key) const
     {
-      const auto n = hash(key);
+      const auto n = hashf(key);
       for (node *first = buckets[n]; first; first = first->next)
       {
         if (equals(get_key(first->val), key))
@@ -307,7 +307,7 @@ namespace zfwstl
     }
     zfwstl::pair<iterator, iterator> equal_range_multi(const key_type &key)
     {
-      const auto n = hash(key);
+      const auto n = hashf(key);
       for (node *first = buckets[n]; first; first = first->next)
       {
         if (equals(get_key(first->val), key))
@@ -443,7 +443,7 @@ namespace zfwstl
     }
     size_type erase_unique(const key_type &key)
     {
-      const auto n = hash(key);
+      const auto n = hashf(key);
       auto first = buckets[n];
       if (first)
       {
@@ -632,6 +632,17 @@ namespace zfwstl
       buckets[n] = tmp;
       ++num_elements;
       return iterator(tmp, this);
+    }
+
+    // hash函数
+    size_type hashf(const key_type &key, size_type n) const
+    {
+      return hash(key) % n;
+    }
+    size_type hashf(const key_type &key) const
+
+    {
+      return hash(key) % buckets.size();
     }
 
     template <class InputIter>

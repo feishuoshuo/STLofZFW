@@ -5,12 +5,12 @@
  */
 #include <cstddef> //for size_t, ptrdiff_t
 #include "hashtable.h"
-#include "../src/functional.h" //for identity
+#include "../src/functional.h" //for identity, equal_to, hash
 #include "../src/util.h"       //for pair
 namespace zfwstl
 {
 
-  template <class Value, class HashFcn, class EqualKey>
+  template <class Value, class HashFcn = zfwstl::hash<Value>, class EqualKey = zfwstl::equal_to<Value>>
   class unordered_set
   {
     typedef hashtable<Value, Value, HashFcn, zfwstl::identity<Value>, EqualKey> ht;

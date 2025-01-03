@@ -203,30 +203,6 @@ namespace zfwstl
     return true;
   }
 
-  // ===========================fill===========================
-  // 为 [first, last)区间内的所有元素填充新值
-  template <class ForwardIter, class T>
-  void fill_cat(ForwardIter first, ForwardIter last, const T &value,
-                zfwstl::forward_iterator_tag)
-  {
-    for (; first != last; ++first)
-      *first = value;
-  }
-
-  template <class RandomIter, class T>
-  void fill_cat(RandomIter first, RandomIter last, const T &value,
-                zfwstl::random_access_iterator_tag)
-  {
-    auto n = last - first;
-    fill_n(first, n, value);
-  }
-
-  template <class ForwardIter, class T>
-  void fill(ForwardIter first, ForwardIter last, const T &value)
-  {
-    fill_cat(first, last, value, iterator_category(first));
-  }
-
   // ===========================fill_n===============================
   // 从 first 位置开始填充 n 个值
   /**
@@ -272,6 +248,30 @@ namespace zfwstl
   OutputIter fill_n(OutputIter first, Size n, const T &value)
   {
     return unchecked_fill_n(first, n, value);
+  }
+
+  // ===========================fill===========================
+  // 为 [first, last)区间内的所有元素填充新值
+  template <class ForwardIter, class T>
+  void fill_cat(ForwardIter first, ForwardIter last, const T &value,
+                zfwstl::forward_iterator_tag)
+  {
+    for (; first != last; ++first)
+      *first = value;
+  }
+
+  template <class RandomIter, class T>
+  void fill_cat(RandomIter first, RandomIter last, const T &value,
+                zfwstl::random_access_iterator_tag)
+  {
+    auto n = last - first;
+    zfwstl::fill_n(first, n, value);
+  }
+
+  template <class ForwardIter, class T>
+  void fill(ForwardIter first, ForwardIter last, const T &value)
+  {
+    fill_cat(first, last, value, iterator_category(first));
   }
 
   // ===========================iter_swap===========================

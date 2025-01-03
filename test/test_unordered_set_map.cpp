@@ -1,5 +1,6 @@
 #include "../STL_2/unordered_map.h"
 #include "../STL_2/unordered_set.h"
+#include "../src/functional.h" //for hash
 #include <iostream>
 #include <string>
 
@@ -12,10 +13,10 @@ struct eqstr
   }
 };
 
-void lookup(const zfwstl::unordered_set<const char *, hash<const char *>, eqstr> &Set,
+void lookup(const zfwstl::unordered_set<const char *, zfwstl::hash<const char *>, eqstr> &Set,
             const char *word)
 {
-  zfwstl::unordered_set<const char *, hash<const char *>, eqstr>::const_iterator it = Set.find(word);
+  zfwstl::unordered_set<const char *, zfwstl::hash<const char *>, eqstr>::const_iterator it = Set.find(word);
   cout << " " << word << ": " << (it != Set.end() ? "present" : "not present") << endl;
 }
 
@@ -24,52 +25,52 @@ int main()
   /**
    * unordered set/map
    */
-  zfwstl::unordered_set<const char *, hash<const char *>, eqstr> Set;
+  zfwstl::unordered_set<const char *, zfwstl::hash<const char *>, eqstr> Set;
   Set.insert("kiwi");
-  // Set.insert("plum");
-  // Set.insert("apple");
-  // Set.insert("mango");
-  // Set.insert("apricot");
-  // Set.insert("banana");
+  Set.insert("plum");
+  Set.insert("apple");
+  Set.insert("mango");
+  Set.insert("apricot");
+  Set.insert("banana");
 
-  // lookup(Set, "mango");
-  // lookup(Set, "apple");
-  // lookup(Set, "durian");
+  auto ite1 = Set.begin();
+  auto ite2 = Set.end();
 
-  // auto ite1 = Set.begin();
-  // auto ite2 = Set.end();
+  for (; ite1 != ite2; ++ite1)
+    cout << *ite1 << ' ';
+  cout << endl;
 
-  // for (; ite1 != ite2; ++ite1)
-  //   cout << *ite1 << ' ';
-  // cout << endl;
+  lookup(Set, "mango");
+  lookup(Set, "apple");
+  lookup(Set, "durian");
 
-  // zfwstl::unordered_set<int> iSet;
-  // iSet.insert(59);
-  // iSet.insert(63);
-  // iSet.insert(108);
-  // iSet.insert(2);
-  // iSet.insert(53);
-  // iSet.insert(55);
+  zfwstl::unordered_set<int> iSet;
+  iSet.insert(59);
+  iSet.insert(63);
+  iSet.insert(108);
+  iSet.insert(2);
+  iSet.insert(53);
+  iSet.insert(55);
 
-  // auto ite11 = iSet.begin();
-  // auto ite22 = iSet.end();
-  // // 为何已排序：
-  // // 因为bucket为193（内置28个质数中大于100的最小质数）
-  // // bucket足够多，造成排序假象
-  // for (; ite11 != ite22; ++ite11)
-  //   cout << *ite11 << ' ';
-  // cout << endl;
+  auto ite11 = iSet.begin();
+  auto ite22 = iSet.end();
+  // 为何已排序：
+  // 因为bucket为193（内置28个质数中大于100的最小质数）
+  // bucket足够多，造成排序假象
+  for (; ite11 != ite22; ++ite11)
+    cout << *ite11 << ' ';
+  cout << endl;
 
-  // iSet.clear();
-  // iSet.insert(3);
-  // iSet.insert(196);
-  // iSet.insert(1);
-  // iSet.insert(389);
-  // iSet.insert(194);
-  // iSet.insert(387);
-  // ite11 = iSet.begin();
-  // for (; ite11 != ite22; ++ite11)
-  //   cout << *ite11 << ' ';
-  // cout << endl;
+  iSet.clear();
+  iSet.insert(3);
+  iSet.insert(196);
+  iSet.insert(1);
+  iSet.insert(389);
+  iSet.insert(194);
+  iSet.insert(387);
+  ite11 = iSet.begin();
+  for (; ite11 != ite22; ++ite11)
+    cout << *ite11 << ' ';
+  cout << endl;
   return 0;
 }
