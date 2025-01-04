@@ -75,6 +75,7 @@ namespace zfwstl
 
     bool operator==(const iterator &it) const { return cur == it.cur; }
     bool operator!=(const iterator &it) const { return cur != it.cur; }
+    bool cur_is_null() const { return cur == nullptr ? true : false; }
   };
 
   template <class Value, class Key, class HashFcn,
@@ -344,6 +345,23 @@ namespace zfwstl
     {
       resize(num_elements + 1); // 判断是否需要重建表格，如需则扩充
       return insert_equal_noresize(obj);
+    }
+    reference find_or_insert(const value_type &obj)
+    {
+      resize(num_elements + 1);
+
+      size_type n = bkt_num(obj);
+      node *first = buckets[n];
+
+      for (node *cur = first; cur; cur = cur->next)
+        if (equals(get_key(cur->val), get_key(obj)))
+          return cur->val;
+
+      node *tmp = new_node(obj);
+      tmp->next = first;
+      buckets[n] = tmp;
+      ++num_elements;
+      return tmp->val;
     }
 
     void erase(const_iterator position)
