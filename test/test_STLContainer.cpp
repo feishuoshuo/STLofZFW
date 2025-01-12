@@ -1,6 +1,6 @@
 #ifndef GOOGLETEST_SAMPLES_H_
 #define GOOGLETEST_SAMPLES_H_
-#include "../googletest-1.14.0/googletest/include/gtest/gtest.h"
+#include "../../googletest-1.14.0/googletest/include/gtest/gtest.h"
 #include <iostream>
 #include <cstddef> // for size_t, ptrdiff_t
 #include <string>
