@@ -1,5 +1,9 @@
-# cmake_minimum_required(VERSION 2.8)# 需求的最低的cmake程序版本
-# project(STLofZFW)#本工程的名字
+cmake_minimum_required(VERSION 2.8)# 需求的最低的cmake程序版本
+project(STLofZFW)# 本工程的名字
+set(CMAKE_CXX_STANDARD 14)# GoogleTest requires at least C++14
+add_subdirectory(test)# 添加测试目录
+
+
 # set(CMAKE_BUILD_TYPE "Debug") #打断点调试代码必设置，Cmake默认是Release会导致断点失效
 # set(CMAKE_CXX_STANDARD 11)#本工程支持的c++版本
 # include_directories(${PROJECT_SOURCE_DIR}/include)#指定头文件在哪里查找

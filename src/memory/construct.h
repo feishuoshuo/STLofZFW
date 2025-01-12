@@ -5,11 +5,12 @@
  * construct : 负责对象的构造
  * destroy   : 负责对象的析构
  */
-#include <cstddef>  // for size_t, ptrdiff_t, nullptr_t
-#include <new>      // for placement new
-#include <cstdlib>  // for exit()
-#include <climits>  // for UINT_MAX
-#include <iostream> // for cerr
+#include <cstddef>   // for size_t, ptrdiff_t, nullptr_t
+#include <new>       // for placement new
+#include <cstdlib>   // for exit()
+#include <climits>   // for UINT_MAX
+#include <iostream>  // for cerr
+#include "../util.h" //for forward
 using namespace std;
 
 namespace zfwstl
@@ -27,12 +28,11 @@ namespace zfwstl
     ::new ((void *)_p) T1(); // 调用 T1 类型的默认构造函数
   }
 
-  // TODO: 需要在util.h文件中编写forward模板
-  //  template <class Ty, class... Args>
-  //  void construct(Ty *ptr, Args &&...args)
-  //  {
-  //    ::new ((void *)ptr) Ty(zfwstl::forward<Args>(args)...);
-  //  }
+  template <class Ty, class... Args>
+  void construct(Ty *ptr, Args &&...args)
+  {
+    ::new ((void *)ptr) Ty(zfwstl::forward<Args>(args)...);
+  }
 
   // 2.destroy 将对象析构 [优化：是否为平凡trivial函数]
   // NOTE:trivial destructor 是指那些不执行任何操作的析构函数

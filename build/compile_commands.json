@@ -1,17 +1,7 @@
 [
 {
-  "directory": "/home/zhoufeiwei/Desktop/STLofZFW/build",
-  "command": "/usr/bin/g++   -I/home/zhoufeiwei/Desktop/STLofZFW/include  -g   -std=gnu++11 -o CMakeFiles/softRenderer.dir/src/zfw.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/src/zfw.cpp",
-  "file": "/home/zhoufeiwei/Desktop/STLofZFW/src/zfw.cpp"
-},
-{
-  "directory": "/home/zhoufeiwei/Desktop/STLofZFW/build",
-  "command": "/usr/bin/g++   -I/home/zhoufeiwei/Desktop/STLofZFW/include  -g   -std=gnu++11 -o CMakeFiles/softRenderer.dir/src/other_source.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/src/other_source.cpp",
-  "file": "/home/zhoufeiwei/Desktop/STLofZFW/src/other_source.cpp"
-},
-{
-  "directory": "/home/zhoufeiwei/Desktop/STLofZFW/build",
-  "command": "/usr/bin/g++   -I/home/zhoufeiwei/Desktop/STLofZFW/include  -g   -std=gnu++11 -o CMakeFiles/calc.dir/STL/calcCMake.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/STL/calcCMake.cpp",
-  "file": "/home/zhoufeiwei/Desktop/STLofZFW/STL/calcCMake.cpp"
+  "directory": "/home/zhoufeiwei/Desktop/STLofZFW/build/test",
+  "command": "/usr/bin/g++    -g   -std=gnu++14 -o CMakeFiles/test_sequence_containers.dir/test_STLContainer.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer.cpp",
+  "file": "/home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer.cpp"
 }
 ]

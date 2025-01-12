@@ -53,19 +53,64 @@ CMAKE_BINARY_DIR = /home/zhoufeiwei/Desktop/STLofZFW/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all:
+all: test/all
 
 .PHONY : all
 
 # The main recursive "preinstall" target.
-preinstall:
+preinstall: test/preinstall
 
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean:
+clean: test/clean
 
 .PHONY : clean
+
+#=============================================================================
+# Directory level rules for directory test
+
+# Recursive "all" directory target.
+test/all: test/CMakeFiles/test_sequence_containers.dir/all
+
+.PHONY : test/all
+
+# Recursive "preinstall" directory target.
+test/preinstall:
+
+.PHONY : test/preinstall
+
+# Recursive "clean" directory target.
+test/clean: test/CMakeFiles/test_sequence_containers.dir/clean
+
+.PHONY : test/clean
+
+#=============================================================================
+# Target rules for target test/CMakeFiles/test_sequence_containers.dir
+
+# All Build rule for target.
+test/CMakeFiles/test_sequence_containers.dir/all:
+	$(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/depend
+	$(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles --progress-num=1,2 "Built target test_sequence_containers"
+.PHONY : test/CMakeFiles/test_sequence_containers.dir/all
+
+# Build rule for subdir invocation for target.
+test/CMakeFiles/test_sequence_containers.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 test/CMakeFiles/test_sequence_containers.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles 0
+.PHONY : test/CMakeFiles/test_sequence_containers.dir/rule
+
+# Convenience name for target.
+test_sequence_containers: test/CMakeFiles/test_sequence_containers.dir/rule
+
+.PHONY : test_sequence_containers
+
+# clean rule for target.
+test/CMakeFiles/test_sequence_containers.dir/clean:
+	$(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/clean
+.PHONY : test/CMakeFiles/test_sequence_containers.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

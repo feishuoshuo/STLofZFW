@@ -461,3 +461,31 @@ Parsed CXX implicit link information from above output:
   implicit fwks: []
 
 
+Determining if the include file pthread.h exists passed with the following output:
+Change Dir: /home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_abe1d/fast && /usr/bin/make -f CMakeFiles/cmTC_abe1d.dir/build.make CMakeFiles/cmTC_abe1d.dir/build
+make[1]: Entering directory '/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_abe1d.dir/CheckIncludeFile.c.o
+/usr/bin/gcc    -o CMakeFiles/cmTC_abe1d.dir/CheckIncludeFile.c.o   -c /home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_abe1d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_abe1d.dir/link.txt --verbose=1
+/usr/bin/gcc      -rdynamic CMakeFiles/cmTC_abe1d.dir/CheckIncludeFile.c.o  -o cmTC_abe1d 
+make[1]: Leaving directory '/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+Change Dir: /home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_bc3a5/fast && /usr/bin/make -f CMakeFiles/cmTC_bc3a5.dir/build.make CMakeFiles/cmTC_bc3a5.dir/build
+make[1]: Entering directory '/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bc3a5.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_bc3a5.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_bc3a5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bc3a5.dir/link.txt --verbose=1
+/usr/bin/gcc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_bc3a5.dir/CheckFunctionExists.c.o  -o cmTC_bc3a5  -lpthread 
+make[1]: Leaving directory '/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/CMakeTmp'
+
+
+

@@ -110,6 +110,19 @@ depend:
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
+#=============================================================================
+# Target rules for targets named test_sequence_containers
+
+# Build rule for target.
+test_sequence_containers: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_sequence_containers
+.PHONY : test_sequence_containers
+
+# fast build rule for target.
+test_sequence_containers/fast:
+	$(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/build
+.PHONY : test_sequence_containers/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -118,6 +131,7 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... test_sequence_containers"
 .PHONY : help
 
 

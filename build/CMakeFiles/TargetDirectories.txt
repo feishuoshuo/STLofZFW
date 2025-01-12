@@ -1,2 +1,5 @@
 /home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/rebuild_cache.dir
 /home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles/edit_cache.dir
+/home/zhoufeiwei/Desktop/STLofZFW/build/test/CMakeFiles/rebuild_cache.dir
+/home/zhoufeiwei/Desktop/STLofZFW/build/test/CMakeFiles/edit_cache.dir
+/home/zhoufeiwei/Desktop/STLofZFW/build/test/CMakeFiles/test_sequence_containers.dir

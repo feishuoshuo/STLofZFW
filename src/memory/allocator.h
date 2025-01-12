@@ -5,6 +5,7 @@
  */
 #include <cstddef>     //for size_t, ptrdiff_t
 #include "construct.h" // for zfwstl::construct, zfwstl::destroy
+#include "../util.h"   // forward, move
 namespace zfwstl
 {
   template <class T>
@@ -54,15 +55,15 @@ namespace zfwstl
     {
       zfwstl::construct(ptr, value);
     }
-    // TODO:左值引用
-    static void construct(T *ptr, T &&value);
-
+    static void construct(T *ptr, T &&value)
+    {
+      zfwstl::construct(ptr, zfwstl::move(value));
+    }
     template <class... Args>
     static void construct(T *ptr, Args &&...args)
     {
-      // TODO: 需要在util.h文件中编写forward模板才能调用
       std::cout << "this is making..." << std::endl;
-      //  mystl::construct(ptr, mystl::forward<Args>(args)...);
+      zfwstl::construct(ptr, zfwstl::forward<Args>(args)...);
     }
 
     static void destroy(T *ptr)
