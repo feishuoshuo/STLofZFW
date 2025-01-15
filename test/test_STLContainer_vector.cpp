@@ -5,20 +5,8 @@
 #include <cstddef> // for size_t, ptrdiff_t
 #include <string>
 #include "../STL/vector.h"
-
-// TEST(ADDTEST, ADDTEST_TRUE) // ADDTEST_TRUE测试用例名称
-// {
-//   EXPECT_STRNE("hello", "world");
-//   EXPECT_EQ(7 * 6, 42); // 断言括号中的返回值是否符合预期
-// }
-// int main(int argc, char **argv)
-// {
-//   testing::InitGoogleTest(&argc, argv);
-//   return RUN_ALL_TESTS(); // 是 Google Test 提供的一个宏，它会自动运行所有注册的测试用例
-// }
-
 /**
- * SContainerTest: 序列容器测试类
+ * SContainerTestVec: 序列容器测试类
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
  * -----------------------------------------------------
  * InitialState：测试向量在初始化后的状态。
@@ -88,6 +76,7 @@ TEST_F(SContainerTestVec, Constructor)
   auto it1 = v2.begin();
   auto it2 = v2.end();
   zfwstl::vector<int> v7(it1, it2); // 范围构造函数
+  EXPECT_EQ(v7, v2);
 }
 // 测试operator=复制赋值操作符
 TEST_F(SContainerTestVec, AssignmentOperator)
@@ -235,7 +224,7 @@ TEST_F(SContainerTestVec, SizeCapacity)
 // 测试数据成员 reserve(调整容量), resize(重置容器大小)
 TEST_F(SContainerTestVec, ReserveResize)
 {
-  print_process("reserve & const");
+  print_process("reserve & resize");
   EXPECT_EQ(v1.size(), 5);
   v1.reserve(20);
   EXPECT_EQ(v1.capacity(), 20);

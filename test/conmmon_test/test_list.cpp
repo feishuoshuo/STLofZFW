@@ -1,4 +1,5 @@
-#include "../STL/list.h"
+#include "../../STL/list.h"
+#include "../../src/iterator.h" //for advance
 void pri(zfwstl::list<int> ilist)
 {
   zfwstl::list<int>::iterator ite;
@@ -14,16 +15,34 @@ int main()
    * list:(带头结点的)循环双向链表
    * sort有三个版本[基数排序的变体、归并排序、快排]
    */
+  {
+    zfwstl::list<int> lst = {5, 2, 8, 3, 1, 6};
+    lst.sort([](int a, int b)
+             { return a < b; }, '\0');
+    std::cout << (lst == zfwstl::list<int>({1, 2, 3, 5, 6, 8})) << std::endl;
+
+    lst = {5, 2, 8, 3, 1, 6};
+    lst.sort([](int a, int b)
+             { return a < b; }, 'q');
+    std::cout << (lst == zfwstl::list<int>({1, 2, 3, 5, 6, 8})) << std::endl;
+
+    lst = {5, 2, 8, 3, 1, 6};
+    lst.sort([](int a, int b)
+             { return a < b; }, 'm');
+    std::cout << (lst == zfwstl::list<int>({1, 2, 3, 5, 6, 8})) << std::endl;
+  }
+
   int i;
   zfwstl::list<int> ilist;
   for (int j = 7; j >= 0; --j)
   {
     ilist.push_back(j);
   }
-  ilist.push_front(6);
   pri(ilist);
-  ilist.sort(); // q m 空
+  ilist.pop_back();
   pri(ilist);
+  // ilist.sort(); // q m 空
+  // pri(ilist);
   // std::cout << "size=" << ilist.size() << std::endl;
 
   // ite = find(ilist.begin(), ilist.end(), 3);

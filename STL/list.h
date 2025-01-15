@@ -6,10 +6,10 @@
  */
 #include <cstddef>                   //for size_t, ptrdiff_t
 #include "../src/memory/allocator.h" //标准空间配置器
-#include "../src/iterator.h"         // for bidirectional_iterator_tag
+#include "../src/iterator.h"         // for bidirectional_iterator_tag, distance
 #include "../src/exceptdef.h"        //for MYSTL_DEBUG, MYSTL_DEBUG
 #include "../src/functional.h"       //函数对象 less<T>()
-#include "../src/util.h"             //for swap
+#include "../src/util.h"             //for swap, forward
 namespace zfwstl
 {
   // ===========================list的节点node结构=============================
@@ -77,7 +77,7 @@ namespace zfwstl
        * 那么每次循环都会创建一个新的迭代器对象，
        * 这将导致不必要的性能开销
        */
-      // TODO:??
+      // TAG: *this
       return *this;
     }
     self &operator++(int)
@@ -123,9 +123,8 @@ namespace zfwstl
 
     typedef __list_iterator<T, T &, T *> iterator;
     typedef __list_iterator<T, const T &, const T *> const_iterator;
-    // TODO:以后可以添加反向迭代器
-    // typedef mystl::reverse_iterator<iterator> reverse_iterator;
-    // typedef mystl::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef zfwstl::reverse_iterator<iterator> reverse_iterator;
+    typedef zfwstl::reverse_iterator<const_iterator> const_reverse_iterator;
 
     allocator_type get_allocator() { return data_allocator(); }
     template <class U>
@@ -136,14 +135,63 @@ namespace zfwstl
     size_type size_; // 大小，不算里面那个空白节点
 
   public:
-    // 构造、复制、移动、析构函数
+    // 默认构造函数
     list() { empty_initialize(0, value_type()); } // 产生一个空链表 Tip:当中存在一个空白节点
+    // 参数化构造函数
     explicit list(size_type n)
     {
       empty_initialize(n, value_type());
     }
-
+    list(size_type n, const T &value)
+    {
+      empty_initialize(n, value);
+    }
+    template <class Iter, typename std::enable_if<zfwstl::is_input_iterator<Iter>::value, int>::type = 0>
+    list(Iter first, Iter last)
+    {
+      copy_init(first, last);
+    }
+    // 初始化列表构造函数
+    list(std::initializer_list<T> ilist)
+    {
+      copy_init(ilist.begin(), ilist.end());
+    }
+    // 拷贝构造
+    list(const list &rhs)
+    {
+      copy_init(rhs.begin(), rhs.end());
+    }
+    // 移动构造
+    list(list &&rhs) noexcept
+        : node(rhs.node), size_(rhs.size_)
+    {
+      rhs.node = nullptr;
+      rhs.size_ = 0;
+    }
+    ~list()
+    {
+      if (node)
+      {
+        clear();
+        list_node_allocator::deallocate(node);
+        node = nullptr;
+      }
+    }
     //=================operator操作运算符重载=====================
+    list &operator=(const list &rhs)
+    {
+      if (this != &rhs)
+      {
+        assign(rhs.begin(), rhs.end());
+      }
+      return *this; // 返回当前对象的引用
+    }
+    list &operator=(std::initializer_list<T> ilist)
+    {
+      list tmp(ilist.begin(), ilist.end());
+      swap(tmp);
+      return *this;
+    }
 
     // 迭代器相关操作
     iterator begin() noexcept
@@ -155,8 +203,19 @@ namespace zfwstl
     const_iterator end() const noexcept { return node; }
     const_iterator cbegin() const noexcept { return begin(); }
     const_iterator cend() const noexcept { return end(); }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+    const_reverse_iterator crbegin() const { return rbegin(); }
+    const_reverse_iterator crend() const { return rend(); }
     // 容量相关操作
-    bool empty() const noexcept { return node->next == node; }
+    bool empty() const noexcept
+    {
+      if (node)
+        return node->next == node;
+      return node == nullptr;
+    }
     size_type size() const noexcept { return size_; }
     size_type max_size() const noexcept { return static_cast<size_type>(-1); } // 理论最大大小
 
@@ -183,11 +242,56 @@ namespace zfwstl
     }
 
     // 修改容器相关操作
-    // TODO:修改容器相关操作
-    void assign();
-    void emplace_front();
-    void emplace_back();
-    void emplace();
+    void assign(size_type n, const value_type &value)
+    {
+      fill_assign(n, value);
+    }
+    template <class Iter, typename std::enable_if<zfwstl::is_input_iterator<Iter>::value, int>::type = 0>
+    void assign(Iter first, Iter last)
+    {
+      copy_assign(first, last);
+    }
+    void assign(std::initializer_list<T> ilist)
+    {
+      copy_assign(ilist.begin(), ilist.end());
+    }
+    // emplace_back, emplace, emplace_front
+    // 在 pos 位置就地构造元素，避免额外的复制或移动开销
+    template <class... Args>
+    void emplace_front(Args &&...args)
+    {
+      THROW_LENGTH_ERROR_IF(size_ > max_size() - 1, "list<T>'s size too big");
+      link_type new_node = create_node(zfwstl::forward<Args>(args)...);
+      new_node->prev = node;
+      new_node->next = node->next;
+      static_cast<link_type>(new_node->next)->prev = new_node;
+      node->next = new_node;
+      ++size_;
+    }
+    template <class... Args>
+    void emplace_back(Args &&...args)
+    {
+      THROW_LENGTH_ERROR_IF(size_ > max_size() - 1, "list<T>'s size too big");
+      link_type new_node = create_node(zfwstl::forward<Args>(args)...);
+      new_node->prev = node->prev;
+      new_node->next = node;
+      static_cast<link_type>(new_node->prev)->next = new_node;
+      node->prev = new_node;
+      ++size_;
+    }
+    template <class... Args>
+    iterator emplace(iterator pos, Args &&...args)
+    {
+      THROW_LENGTH_ERROR_IF(size_ > max_size() - 1, "list<T>'s size too big");
+      auto new_node = create_node(zfwstl::forward<Args>(args)...);
+      static_cast<link_type>(pos.node->prev)->next = new_node;
+      new_node->prev = pos.node->prev;
+      pos.node->prev = new_node;
+      new_node->next = pos.node;
+      ++size_;
+      return iterator(new_node);
+    }
+
     // 传入一个 new_size，如果链表旧长度大于 new_size 的大小, 那就删除后面多余的节点
     void resize();
     iterator insert(iterator position, const T &x)
@@ -200,7 +304,29 @@ namespace zfwstl
       static_cast<link_type>(position.node->prev)->next = tmp; // 防止该链表就一个节点
       position.node->prev = tmp;
       ++size_; // 链表个数 +1
-      return tmp;
+      return iterator(tmp);
+      ;
+    }
+    iterator insert(iterator position, size_type n, const T &x)
+    {
+      THROW_LENGTH_ERROR_IF(size_ > max_size() - 1, "list<T>'s size too big");
+      for (; n > 0; --n)
+      {
+        insert(position, x);
+      }
+      return position;
+    }
+    template <class Iter, typename std::enable_if<
+                              zfwstl::is_input_iterator<Iter>::value, int>::type = 0>
+    iterator insert(iterator position, Iter first, Iter last)
+    {
+      THROW_LENGTH_ERROR_IF(size_ > max_size() - 1, "list<T>'s size too big");
+      for (; first != last; ++first)
+      {
+        position = insert(position, *first);
+        ++position;
+      }
+      return position;
     }
     void push_front(const T &x) { insert(begin(), x); }
     void push_back(const T &x) { insert(end(), x); }
@@ -208,17 +334,34 @@ namespace zfwstl
     void pop_back()
     {
       iterator tmp = end();
-      erase(--tmp);
+      --tmp;
+      if (size_ > 0)
+        erase(tmp);
     }
     iterator erase(iterator position)
     {
-      MYSTL_DEBUG(size_ <= 0);
       link_type next_node = static_cast<link_type>(position.node->next);
       link_type prev_node = static_cast<link_type>(position.node->prev);
       prev_node->next = next_node;
       next_node->prev = prev_node;
       destroy_node(position.node);
       --size_; // 链表个数 -1
+      return iterator(next_node);
+    }
+    iterator erase(iterator first, iterator last)
+    {
+      link_type next_node = static_cast<link_type>(last.node);
+      link_type prev_node = static_cast<link_type>(first.node->prev);
+      prev_node->next = next_node;
+      next_node->prev = prev_node;
+      // 清理节点
+      while (first != last)
+      {
+        auto tmp = first;
+        ++first;
+        destroy_node(tmp.node);
+        --size_;
+      }
       return iterator(next_node);
     }
     void remove(const T &value)
@@ -232,6 +375,21 @@ namespace zfwstl
         if (*first == value)
           erase(first);
         first = next;
+      }
+    }
+    // 将另一元操作 pred 为 true 的所有元素移除
+    template <class UnaryPredicate>
+    void remove_if(UnaryPredicate pred)
+    {
+      auto f = begin();
+      auto l = end();
+      for (auto next = f; f != l; f = next)
+      {
+        ++next;
+        if (pred(*f))
+        {
+          erase(f);
+        }
       }
     }
     // 移除数值相同的连续元素：只有“连续而相同的元素”，才会被移除剩下一个
@@ -249,6 +407,28 @@ namespace zfwstl
         else
           first = next;
         next = first; // 修正区段范围
+      }
+    }
+    // 移除 list 中满足 pred 为 true 重复元素
+    template <class BinaryPredicate>
+    void unique(BinaryPredicate pred)
+    {
+      auto i = begin();
+      auto e = end();
+      auto j = i;
+      ++j;
+      while (j != e)
+      {
+        if (pred(*i, *j))
+        {
+          erase(j);
+        }
+        else
+        {
+          i = j;
+        }
+        j = i;
+        ++j;
       }
     }
     void clear()
@@ -285,23 +465,30 @@ namespace zfwstl
     {
       if (!__x.empty())
         this->transfer(position, __x.begin(), __x.end());
+      size_ += __x.size();
+      __x.size_ = 0;
     }
     // 将 i所指元素接合于 position所指位置之前。position和 i可指向同一个 list
-    void splice(iterator position, list &, iterator i)
+    void splice(iterator position, list &lis, iterator i)
     {
       iterator j = i;
       ++j;
       if (position == i || position == j)
         return;
       this->transfer(position, i, j);
+      ++size_; //! ！ 更新个数
+      --lis.size_;
     }
     // 将 [first,last)内的所有元素接合于 position所指位置之前。
     // position和[first,last)可指向同一个 list，
     // 但 position不能位于[first,last)之内。
-    void splice(iterator position, list &, iterator first, iterator last)
+    void splice(iterator position, list &lis, iterator first, iterator last)
     {
+      size_type n = zfwstl::distance(first, last);
       if (first != last)
         this->transfer(position, first, last);
+      size_ += n;
+      lis.size_ -= n;
     }
     // list 相关操作 remove remove_if merge sort reverse
     // 将*this内容逆向重置
@@ -339,12 +526,12 @@ namespace zfwstl
       if (node->next == node || static_cast<link_type>(node->next)->next == node)
         return;
       MYSTL_DEBUG(x != 'q' || x != 'm' || x != '\0');
-      if (x == '\0')
-        _sort(comp); // SGI版本
+      if (x == 'm')
+        merge_sort(begin(), end(), size_, comp);
       else if (x == 'q')
         quick_sort(begin(), end(), comp);
       else
-        merge_sort(comp);
+        _sort(comp); // SGI版本
     }
     void merge(list &x) { _merge(x, zfwstl::less<T>()); }
     template <class Compared>
@@ -358,10 +545,11 @@ namespace zfwstl
     }
     void pop_node(link_type p) { list_node_allocator::deallocate(p); }
     // 产生(配置并构造)一个节点，带元素值
-    link_type create_node(const T &x)
+    template <class... Args>
+    link_type create_node(Args &&...args)
     {
       link_type p = get_node();
-      zfwstl::construct(&p->data, x); //(&(p->data))取p指向的data成员的地址
+      zfwstl::construct(&p->data, zfwstl::forward<Args>(args)...); //(&(p->data))取p指向的data成员的地址
       return p;
     }
     // 销毁(析构并释放)一个节点
@@ -374,17 +562,63 @@ namespace zfwstl
     {
       node = get_node(); // 配置一个节点空间，令 node 指向它
       size_ = 0;
+      node->next = node;
+      node->prev = node;
       if (n == 0)
-      {
-        node->next = node;
-        node->prev = node;
-      }
+        return;
       else
       {
         try
         {
           for (; n > 0; --n)
             insert(begin(), value);
+        }
+        catch (...)
+        {
+          clear();
+          throw;
+        }
+      }
+    }
+    void fill_assign(size_type n, const value_type &value)
+    {
+      auto i = begin();
+      auto e = end();
+      for (; n > 0 && i != e; --n, ++i)
+        *i = value;
+      if (n > 0)
+        insert(e, n, value);
+      else
+        erase(i, e);
+    }
+    template <class Iter>
+    void copy_assign(Iter f2, Iter l2)
+    {
+      auto f1 = begin();
+      auto l1 = end();
+      for (; f1 != l1 && f2 != l2; ++f1, ++f2)
+        *f1 = *f2;
+      if (f2 == l2)
+        erase(f1, l1);
+      else
+        insert(l1, f2, l2);
+    }
+    template <class Iter>
+    void copy_init(Iter first, Iter last)
+    {
+      node = get_node();
+      size_ = 0;
+      node->next = node;
+      node->prev = node;
+      size_type n = zfwstl::distance(first, last);
+      if (n == 0)
+        return;
+      else
+      {
+        try
+        {
+          for (; n > 0; --n, ++first)
+            insert(end(), *first);
         }
         catch (...)
         {
@@ -434,6 +668,8 @@ namespace zfwstl
       }
       if (first2 != last2)
         transfer(last1, first2, last2);
+      size_ += x.size_;
+      x.size_ = 0;
     }
     template <class Compared>
     void _sort(Compared comp)
@@ -534,12 +770,33 @@ namespace zfwstl
   };
 
   //========================模板类外重载操作===============
-  // TODO:operator操作运算符重载
   // 重载 zfwstl 的 swap
   template <class U>
   void swap(list<U> &lhs, list<U> &rhs) noexcept
   {
     lhs.swap(rhs);
+  }
+  template <typename T>
+  bool operator==(const list<T> &lhs, const list<T> &rhs)
+  {
+    if (lhs.size() != rhs.size())
+      return false;
+    auto tmp1 = lhs.begin();
+    auto tmp2 = rhs.begin();
+    while (tmp1 != lhs.end() && tmp2 != rhs.end())
+    {
+      if (*tmp1 != *tmp2)
+        return false;
+      ++tmp1;
+      ++tmp2;
+    }
+    return true;
+  }
+
+  template <typename T>
+  bool operator!=(const list<T> &lhs, const list<T> &rhs)
+  {
+    return !(lhs == rhs);
   }
 }
 #endif // !ZFWSTL_LIST_H_

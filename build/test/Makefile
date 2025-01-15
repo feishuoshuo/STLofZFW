@@ -125,32 +125,32 @@ test_sequence_containers/fast:
 	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/build
 .PHONY : test_sequence_containers/fast
 
-test_STLContainer.o: test_STLContainer.cpp.o
+test_STLContainer_list.o: test_STLContainer_list.cpp.o
 
-.PHONY : test_STLContainer.o
+.PHONY : test_STLContainer_list.o
 
 # target to build an object file
-test_STLContainer.cpp.o:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer.cpp.o
-.PHONY : test_STLContainer.cpp.o
+test_STLContainer_list.cpp.o:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_list.cpp.o
+.PHONY : test_STLContainer_list.cpp.o
 
-test_STLContainer.i: test_STLContainer.cpp.i
+test_STLContainer_list.i: test_STLContainer_list.cpp.i
 
-.PHONY : test_STLContainer.i
+.PHONY : test_STLContainer_list.i
 
 # target to preprocess a source file
-test_STLContainer.cpp.i:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer.cpp.i
-.PHONY : test_STLContainer.cpp.i
+test_STLContainer_list.cpp.i:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_list.cpp.i
+.PHONY : test_STLContainer_list.cpp.i
 
-test_STLContainer.s: test_STLContainer.cpp.s
+test_STLContainer_list.s: test_STLContainer_list.cpp.s
 
-.PHONY : test_STLContainer.s
+.PHONY : test_STLContainer_list.s
 
 # target to generate assembly for a file
-test_STLContainer.cpp.s:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer.cpp.s
-.PHONY : test_STLContainer.cpp.s
+test_STLContainer_list.cpp.s:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_list.cpp.s
+.PHONY : test_STLContainer_list.cpp.s
 
 # Help Target
 help:
@@ -161,9 +161,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... test_sequence_containers"
-	@echo "... test_STLContainer.o"
-	@echo "... test_STLContainer.i"
-	@echo "... test_STLContainer.s"
+	@echo "... test_STLContainer_list.o"
+	@echo "... test_STLContainer_list.i"
+	@echo "... test_STLContainer_list.s"
 .PHONY : help
 
 
