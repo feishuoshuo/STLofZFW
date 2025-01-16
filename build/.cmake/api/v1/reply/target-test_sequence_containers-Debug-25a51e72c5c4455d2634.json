@@ -98,7 +98,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "test/test_STLContainer_list.cpp",
+			"path" : "test/test_STLContainer_stack.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

@@ -1,5 +1,5 @@
-#ifndef GOOGLETEST_SAMPLES_H_
-#define GOOGLETEST_SAMPLES_H_
+#ifndef GOOGLETEST_SAMPLES_deque_H_
+#define GOOGLETEST_SAMPLES_deque_H_
 #include "../../googletest-1.14.0/googletest/include/gtest/gtest.h"
 #include <iostream>
 #include <cstddef> // for size_t, ptrdiff_t
@@ -305,4 +305,4 @@ int main(int argc, char **argv)
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-#endif // GOOGLETEST_SAMPLES_H_
+#endif // GOOGLETEST_SAMPLES_deque_H_

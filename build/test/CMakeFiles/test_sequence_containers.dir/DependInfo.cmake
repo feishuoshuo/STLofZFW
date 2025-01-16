@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_list.cpp" "/home/zhoufeiwei/Desktop/STLofZFW/build/test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_list.cpp.o"
+  "/home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack.cpp" "/home/zhoufeiwei/Desktop/STLofZFW/build/test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

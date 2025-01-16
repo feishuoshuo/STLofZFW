@@ -7,10 +7,10 @@
  */
 #include <cstddef>                       //for size_t, ptrdiff_t
 #include "../src/memory/allocator.h"     //标准空间配置器
-#include "../src/algorithms/algorithm.h" //for max(), copy(), copy_backward()
+#include "../src/algorithms/algorithm.h" //for max(), copy(), copy_backward(), fill()
 #include "../src/memory/unintialized.h"  //for uninitialized_fill(), uninitialized_copy()
 #include "../src/exceptdef.h"            //for MYSTL_DEBUG, THROW_OUT_OF_RANGE_IF
-#include "../src/iterator.h"             //for reverse_iterator, distance, is_input_iterator
+#include "../src/iterator.h"             //for reverse_iterator, distance, is_input_iterator, advance, input_iterator_tag
 #include "../src/util.h"                 //for forward
 namespace zfwstl
 {
@@ -51,6 +51,31 @@ namespace zfwstl
      */
     value_pointer last; // 指向所在缓冲区的尾部(含备用空间),不是指向最后一个元素！
     map_pointer node;   // 缓冲区所在节点(指向管控中心)
+
+    // 构造、复制、移动函数
+    __deque_iterator() noexcept
+        : cur(nullptr), first(nullptr), last(nullptr), node(nullptr) {}
+
+    __deque_iterator(value_pointer v, map_pointer n)
+        : cur(v), first(*n), last(*n + buffer_size), node(n) {}
+
+    __deque_iterator(const iterator &rhs)
+        : cur(rhs.cur), first(rhs.first), last(rhs.last), node(rhs.node)
+    {
+    }
+    __deque_iterator(iterator &&rhs) noexcept
+        : cur(rhs.cur), first(rhs.first), last(rhs.last), node(rhs.node)
+    {
+      rhs.cur = nullptr;
+      rhs.first = nullptr;
+      rhs.last = nullptr;
+      rhs.node = nullptr;
+    }
+
+    __deque_iterator(const const_iterator &rhs)
+        : cur(rhs.cur), first(rhs.first), last(rhs.last), node(rhs.node)
+    {
+    }
 
     /**
      * 一旦行进时遇到缓冲区边缘，要特别当心！视前进或后退而定，可能需调用以下函数：
@@ -143,7 +168,17 @@ namespace zfwstl
     }
     // TAG:*this 是一个指针，它指向当前对象
     reference operator[](difference_type n) const { return *(*this + n); }
-
+    self &operator=(const iterator &rhs)
+    {
+      if (this != &rhs)
+      {
+        cur = rhs.cur;
+        first = rhs.first;
+        last = rhs.last;
+        node = rhs.node;
+      }
+      return *this;
+    }
     // 重载比较操作符
     bool operator==(const self &rhs) const { return cur == rhs.cur; }
     bool operator<(const self &rhs) const
@@ -192,13 +227,37 @@ namespace zfwstl
 
   public:
     // 构造、复制、移动、析构函数
-    // TODO：需要完善
+    // 默认构造函数
     deque() { fill_initialize(0, value_type()); }
     // TAG：以防止类的构造函数参与隐式类型转换。当一个构造函数被声明为 explicit 时，这意味着它不能用于隐式转换，只能用于直接的函数调用和显式构造
+    // 参数化构造函数
     explicit deque(size_type n) { fill_initialize(n, value_type()); }
+    deque(size_type n, const value_type &value)
+    {
+      fill_initialize(n, value);
+    }
     template <class IIter, typename std::enable_if<zfwstl::is_input_iterator<IIter>::value, int>::type = 0>
     deque(IIter first, IIter last) { copy_init(first, last, iterator_category(first)); }
-    deque(int n, const value_type &value) { fill_initialize(n, value); }
+    // 初始化列表构造函数
+    deque(std::initializer_list<value_type> ilist)
+    {
+      copy_init(ilist.begin(), ilist.end(), zfwstl::forward_iterator_tag());
+    }
+    // 拷贝构造
+    deque(const deque &rhs)
+    {
+      copy_init(rhs.begin(), rhs.end(), zfwstl::forward_iterator_tag());
+    }
+    // 移动构造
+    deque(deque &&rhs) noexcept
+        : start(zfwstl::move(rhs.start)),
+          finish(zfwstl::move(rhs.finish)),
+          map(rhs.map),
+          map_size(rhs.map_size)
+    {
+      rhs.map = nullptr;
+      rhs.map_size = 0;
+    }
     ~deque()
     {
       if (map != nullptr)
@@ -217,7 +276,7 @@ namespace zfwstl
     }
     const_iterator begin() const noexcept
     {
-      return start;
+      return const_iterator(start);
     }
     iterator end() noexcept
     {
@@ -225,16 +284,12 @@ namespace zfwstl
     }
     const_iterator end() const noexcept
     {
-      return finish;
+      return const_iterator(finish);
     }
-    reverse_iterator rbegin() noexcept
-    {
-      auto tmp = reverse_iterator(end());
-      return reverse_iterator(end());
-    }
-    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
-    const_reverse_iterator rbegin() const noexcept { return reverse_iterator(end()); }
-    const_reverse_iterator rend() const noexcept { return reverse_iterator(begin()); }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    reverse_iterator rend() const noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() noexcept { return const_reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
     const_iterator cbegin() const noexcept
     {
       return begin();
@@ -242,6 +297,14 @@ namespace zfwstl
     const_iterator cend() const noexcept
     {
       return end();
+    }
+    const_reverse_iterator crbegin() const noexcept
+    {
+      return rbegin();
+    }
+    const_reverse_iterator crend() const noexcept
+    {
+      return const_reverse_iterator(begin());
     }
     // 调用__deque_iterator<>::operator*
     reference front()
@@ -273,7 +336,20 @@ namespace zfwstl
     // 容量相关操作
     size_type size() const { return finish - start; }
     size_type max_size() const { return size_type(-1); }
-    void resize();
+    // 重置容器大小
+    void resize(size_type new_size) { resize(new_size, value_type()); }
+    void resize(size_type new_size, const value_type &value)
+    {
+      const auto len = size();
+      if (new_size < len)
+      {
+        erase(start + new_size, finish);
+      }
+      else
+      {
+        insert(finish, new_size - len, value);
+      }
+    }
     bool empty() const { return finish == start; }
     //=================operator操作运算符重载=====================
     // 调用__deque_iterator<>::operator[]
@@ -286,6 +362,54 @@ namespace zfwstl
     {
       MYSTL_DEBUG(n < size());
       return start[static_cast<difference_type>(n)];
+    }
+    // 复制赋值运算符
+    deque &operator=(const deque &rhs)
+    {
+      if (this != &rhs)
+      {
+        const auto len = size();
+        if (len >= rhs.size())
+        {
+          erase(zfwstl::copy(rhs.start, rhs.finish, start), finish);
+        }
+        else
+        {
+          iterator mid = rhs.begin() + static_cast<difference_type>(len);
+          zfwstl::copy(rhs.start, mid, start);
+          insert(finish, mid, rhs.finish);
+        }
+      }
+      return *this;
+    }
+    // 移动赋值运算符
+    deque &operator=(deque &&rhs)
+    {
+      clear();
+      start = zfwstl::move(rhs.start);
+      finish = zfwstl::move(rhs.finish);
+      map = rhs.map;
+      map_size = rhs.map_size;
+      rhs.map = nullptr;
+      rhs.map_size = 0;
+      return *this;
+    }
+    deque &operator=(std::initializer_list<value_type> ilist)
+    {
+      deque tmp(ilist);
+      swap(tmp);
+      return *this;
+    }
+
+    void swap(deque &rhs) noexcept
+    {
+      if (this != &rhs)
+      {
+        zfwstl::swap(start, rhs.start);
+        zfwstl::swap(finish, rhs.finish);
+        zfwstl::swap(map, rhs.map);
+        zfwstl::swap(map_size, rhs.map_size);
+      }
     }
 
     // 访问元素相关操作
@@ -325,8 +449,82 @@ namespace zfwstl
       // 调整状态
       finish = start;
     }
-    void assign();
-    void emplace();
+    // 缩减容器容量
+    /**
+     * 只释放多余的缓冲区。
+     * 重新分配内存，以确保 deque 的容量与大小匹配。
+     * 更新 start 和 finish 迭代器，以指向新的内存区域。
+     */
+    void shrink_to_fit() noexcept
+    {
+      if (empty())
+        return; // 如果容器为空，直接返回
+      // 计算当前使用的缓冲区数量
+      size_type used_buffers = finish.node - start.node + 1;
+      if (used_buffers <= 2)
+        return; // 如果使用的缓冲区数量已经是最小值，直接返回
+
+      // 计算新的 map 大小
+      size_type new_map_size = used_buffers + 2; // 保留一个头部和一个尾部的备用缓冲区
+      // 分配新的 map
+      map_pointer new_map = map_allocator::allocate(new_map_size);
+      map_pointer new_nstart = new_map + new_map_size / 2;
+      // 复制当前使用的缓冲区到新的 map
+      zfwstl::copy(start.node, finish.node + 1, new_nstart);
+      // for (size_type i = 0; i < used_buffers; ++i)
+      // {
+      //   new_map[i + 1] = map[i + start.node - map];
+      // }
+
+      // destroy_buffer(start.node, finish.node + 1); // 释放旧的 map 中的缓冲区
+      map_allocator::deallocate(map, map_size); // 释放旧的 map
+
+      // 更新 map 和 map_size
+      map = new_map;
+      map_size = new_map_size;
+
+      // 更新 start 和 finish
+      start.set_node(new_nstart);
+      finish.set_node(new_nstart + used_buffers - 1);
+    }
+    void assign(size_type n, const value_type &value)
+    {
+      fill_assign(n, value);
+    }
+
+    template <class IIter, typename std::enable_if<
+                               zfwstl::is_input_iterator<IIter>::value, int>::type = 0>
+    void assign(IIter first, IIter last)
+    {
+      copy_assign(first, last, iterator_category(first));
+    }
+
+    void assign(std::initializer_list<value_type> ilist)
+    {
+      copy_assign(ilist.begin(), ilist.end(), zfwstl::forward_iterator_tag{});
+    }
+
+    // emplace_front / emplace_back / emplace
+    template <class... Args>
+    void emplace_front(Args &&...args)
+    {
+      {
+        if (start.cur != start.first)
+        {
+          data_allocator::construct(start.cur - 1, zfwstl::forward<Args>(args)...);
+          --start.cur;
+        }
+        else
+        {
+          reserve_map_at_front();
+          // 配置一个新节点(buffer缓冲区)
+          *(start.node - 1) = allocate_node();
+          start.set_node(start.node - 1);
+          start.cur = start.last - 1;
+          data_allocator::construct(start.cur, zfwstl::forward<Args>(args)...);
+        }
+      }
+    }
     // NOTE: Args &&...args：这是一个可变参数模板，它允许函数接受任意数量和类型的参数。
     //  && 表示参数通过右值引用传递，这允许完美转发，即保持参数的左值/右值属性
     template <class... Args>
@@ -340,10 +538,29 @@ namespace zfwstl
       else
       {
         reserve_map_at_back();
+        // 配置一个新节点(buffer缓冲区)
+        *(finish.node + 1) = allocate_node();
         data_allocator::construct(finish.cur, zfwstl::forward<Args>(args)...);
-        ++finish;
+        finish.set_node(finish.node + 1);
+        finish.cur = finish.first;
       }
     }
+    template <class... Args>
+    iterator emplace(iterator pos, Args &&...args)
+    {
+      if (pos.cur == start.cur)
+      {
+        emplace_front(zfwstl::forward<Args>(args)...);
+        return start;
+      }
+      else if (pos.cur == finish.cur)
+      {
+        emplace_back(zfwstl::forward<Args>(args)...);
+        return finish - 1;
+      }
+      return insert_aux(pos, zfwstl::forward<Args>(args)...);
+    }
+
     void push_back(const value_type &x)
     {
       if (finish.cur == (finish.last - 1))
@@ -405,6 +622,55 @@ namespace zfwstl
       else
         return insert_aux(position, x);
     }
+    iterator insert(iterator position, value_type &&value)
+    {
+      if (position.cur == start.cur)
+      {
+        emplace_front(zfwstl::move(value));
+        return start;
+      }
+      else if (position.cur == finish.cur)
+      {
+        emplace_back(zfwstl::move(value));
+        auto tmp = finish;
+        --tmp;
+        return tmp;
+      }
+      else
+      {
+        return insert_aux(position, zfwstl::move(value));
+      }
+    }
+    // 在 position 位置插入 n 个元素
+    void insert(iterator position, size_type n, const value_type &value)
+    {
+      if (position.cur == start.cur)
+      {
+        require_capacity(n, true);
+        auto new_begin = start - n;
+        zfwstl::uninitialized_fill_n(new_begin, n, value);
+        start = new_begin;
+      }
+      else if (position.cur == finish.cur)
+      {
+        require_capacity(n, false);
+        auto new_end = finish + n;
+        zfwstl::uninitialized_fill_n(finish, n, value);
+        finish = new_end;
+      }
+      else
+      {
+        // 在中间位置插入n个元素
+        fill_insert(position, n, value);
+      }
+    }
+    template <class IIter, typename std::enable_if<
+                               zfwstl::is_input_iterator<IIter>::value, int>::type = 0>
+    void insert(iterator position, IIter first, IIter last)
+    {
+      insert_dispatch(position, first, last, iterator_category(first));
+    }
+
     iterator erase(iterator position)
     {
       iterator next = position;
@@ -438,7 +704,7 @@ namespace zfwstl
           // 前方元素较少
           zfwstl::copy_backward(start, first, last); // 向后移动前方元素(覆盖清除区间)
           iterator new_start = start + n;            // 标记deque新起点
-          data_allocator::destroy(start, new_start);
+          data_allocator::destroy(start.first, new_start.last);
           // 将冗余的缓冲区释放
           for (auto cur = start.node; cur < new_start.node; ++cur)
             data_allocator::deallocate(*cur, start.buffer_size);
@@ -449,7 +715,7 @@ namespace zfwstl
           // 后方元素较少
           zfwstl::copy(last, finish, first); // 向前移动后方元素(覆盖清除区间)
           iterator new_finish = finish - n;
-          data_allocator::destroy(new_finish, finish);
+          data_allocator::destroy(new_finish.first, finish.last);
           // 将冗余的缓冲区释放
           for (auto cur = new_finish.node + 1; cur <= finish.node; ++cur)
             data_allocator::deallocate(*cur, finish.buffer_size);
@@ -470,6 +736,61 @@ namespace zfwstl
     {
       data_allocator::deallocate(p, start.buffer_size);
     }
+    // NOTE: deque关键函数！配置多个新节点(buffer缓冲区)
+    void create_buffer(map_pointer nstart, map_pointer nfinish)
+    {
+      map_pointer cur;
+      try
+      {
+        for (cur = nstart; cur <= nfinish; ++cur)
+        {
+          *cur = data_allocator::allocate(start.buffer_size);
+        }
+      }
+      catch (...)
+      {
+        while (cur != nstart)
+        {
+          --cur;
+          data_allocator::deallocate(*cur, start.buffer_size);
+          *cur = nullptr;
+        }
+        throw;
+      }
+    }
+    // destroy_buffer 函数
+    void destroy_buffer(map_pointer nstart, map_pointer nfinish)
+    {
+      for (map_pointer n = nstart; n <= nfinish; ++n)
+      {
+        data_allocator::deallocate(*n, start.buffer_size);
+        *n = nullptr;
+      }
+    }
+    // NOTE: deque关键函数！ 确保deque有足够的容量来插入新的元素，具体来说，它会根据需要在deque的前端或后端扩展容量
+    void require_capacity(size_type n, bool front)
+    {
+      if (front && (static_cast<size_type>(start.cur - start.first) < n))
+      {
+        const size_type need_buffer = (n - (start.cur - start.first)) / start.buffer_size + 1;
+        if (need_buffer > static_cast<size_type>(start.node - map))
+        {
+          reserve_map_at_front(need_buffer);
+          return;
+        }
+        create_buffer(start.node - need_buffer, start.node - 1);
+      }
+      else if (!front && (static_cast<size_type>(finish.last - finish.cur - 1) < n))
+      {
+        const size_type need_buffer = (n - (finish.last - finish.cur - 1)) / finish.buffer_size + 1;
+        if (need_buffer > static_cast<size_type>((map + map_size) - finish.node - 1))
+        {
+          reserve_map_at_back(need_buffer);
+          return;
+        }
+        create_buffer(finish.node + 1, finish.node + need_buffer);
+      }
+    }
     void create_map_and_nodes(size_type num_elements)
     {
       // 需要map节点数=(元素个数/每个缓冲区可容纳元素个数)+1
@@ -477,8 +798,8 @@ namespace zfwstl
       const size_type num_nodes = num_elements / start.buffer_size + 1;
       // 一个map管理节点数最少8个，最多 ="所需节点数 +2(前后各预留一个，扩充时可用) "
       map_size = zfwstl::max(static_cast<size_type>(DEQUE_MAP_INIT_SIZE), num_nodes + 2);
-      std::cout << "buffer_size:" << start.buffer_size << std::endl;
-      std::cout << "map_size:" << map_size << std::endl;
+      // std::cout << "buffer_size:" << start.buffer_size << std::endl;
+      // std::cout << "map_size:" << map_size << std::endl;
       map = map_allocator::allocate(map_size); // 分配内存空间
       // nstart, nfinish指向map所拥有之全部节点的最中央区段
       map_pointer nstart = map + (map_size - num_nodes) / 2;
@@ -631,6 +952,243 @@ namespace zfwstl
       *position = x_copy;
       return position;
     }
+    template <class IIter>
+    void insert_dispatch(iterator position, IIter first, IIter last, input_iterator_tag)
+    {
+      if (last <= first)
+        return;
+      const size_type n = zfwstl::distance(first, last);
+      const size_type elems_before = position - start;
+      if (elems_before < (size() / 2))
+      {
+        require_capacity(n, true);
+      }
+      else
+      {
+        require_capacity(n, false);
+      }
+      position = start + elems_before;
+      auto cur = --last;
+      for (size_type i = 0; i < n; ++i, --cur)
+      {
+        insert(position, *cur);
+      }
+    }
+    template <class FIter>
+    void insert_dispatch(iterator position, FIter first, FIter last, forward_iterator_tag)
+    {
+      if (last <= first)
+        return;
+      const size_type n = zfwstl::distance(first, last);
+      if (position.cur == start.cur)
+      {
+        require_capacity(n, true);
+        auto new_begin = start - n;
+        try
+        {
+          zfwstl::uninitialized_copy(first, last, new_begin);
+          start = new_begin;
+        }
+        catch (...)
+        {
+          if (new_begin.node != start.node)
+            for (map_pointer n = new_begin.node; n <= start.node - 1; ++n)
+            {
+              data_allocator::deallocate(*n, start.buffer_size);
+              *n = nullptr;
+            }
+          throw;
+        }
+      }
+      else if (position.cur == finish.cur)
+      {
+        require_capacity(n, false);
+        auto new_end = finish + n;
+        try
+        {
+          zfwstl::uninitialized_copy(first, last, finish);
+          finish = new_end;
+        }
+        catch (...)
+        {
+          if (new_end.node != finish.node)
+            for (map_pointer n = finish.node + 1; n <= new_end.node; ++n)
+            {
+              data_allocator::deallocate(*n, finish.buffer_size);
+              *n = nullptr;
+            }
+          throw;
+        }
+      }
+      else
+      {
+        copy_insert(position, first, last, n);
+      }
+    }
+    // fill_insert 函数
+    void fill_insert(iterator position, size_type n, const value_type &value)
+    {
+      const size_type elems_before = position - start; // 插入位置前元素数量
+      const size_type len = size();
+      auto value_copy = value;
+      if (elems_before < (len / 2)) // 若在容器前半部分插入
+      {
+        require_capacity(n, true);
+        // 原来的迭代器可能会失效
+        auto old_begin = start;
+        auto new_begin = start - n;
+        position = start + elems_before;
+        try
+        {
+          if (elems_before >= n)
+          {
+            auto start_n = start + n;
+            zfwstl::uninitialized_copy(start, start_n, new_begin); // 在新空间的开始位置进行未初始化复制
+            start = new_begin;                                     // 更新容器的开始位置
+            zfwstl::copy(start_n, position, old_begin);            // 将插入位置前的元素向后移动
+            zfwstl::fill(position - n, position, value_copy);
+          }
+          else
+          {
+
+            zfwstl::uninitialized_fill(zfwstl::uninitialized_copy(start, position, new_begin), start, value_copy); // 在新空间的开始位置进行未初始化填充
+            start = new_begin;                                                                                     // 更新容器的开始位置
+            zfwstl::fill(old_begin, position, value_copy);                                                         // 在插入位置填充新元素
+          }
+        }
+        catch (...)
+        {
+          if (new_begin.node != start.node)
+            for (map_pointer n = new_begin.node; n <= start.node - 1; ++n)
+            {
+              data_allocator::deallocate(*n, start.buffer_size);
+              *n = nullptr;
+            }
+
+          throw;
+        }
+      }
+      else
+      {
+        require_capacity(n, false);
+        // 原来的迭代器可能会失效，重新计算插入位置
+        auto old_end = finish;
+        auto new_end = finish + n;
+        const size_type elems_after = len - elems_before;
+        position = finish - elems_after;
+        try
+        {
+          if (elems_after > n)
+          {
+            auto end_n = finish - n;
+            zfwstl::uninitialized_copy(end_n, finish, finish);
+            finish = new_end;
+            zfwstl::copy_backward(position, end_n, old_end);
+            zfwstl::fill(position, position + n, value_copy);
+          }
+          else
+          {
+            zfwstl::uninitialized_fill(finish, position + n, value_copy);
+            zfwstl::uninitialized_copy(position, finish, position + n);
+            finish = new_end;
+            zfwstl::fill(position, old_end, value_copy);
+          }
+        }
+        catch (...)
+        {
+          if (new_end.node != finish.node)
+            for (map_pointer n = finish.node + 1; n <= new_end.node; ++n)
+            {
+              data_allocator::deallocate(*n, finish.buffer_size);
+              *n = nullptr;
+            }
+          throw;
+        }
+      }
+    }
+    template <class FIter>
+    void copy_insert(iterator position, FIter first, FIter last, size_type n)
+    {
+      const size_type elems_before = position - start;
+      auto len = size();
+      if (elems_before < (len / 2))
+      {
+        reserve_map_at_front();
+        // 原来的迭代器可能会失效
+        auto old_begin = start;
+        auto new_begin = start - n;
+        position = start + elems_before;
+        try
+        {
+          if (elems_before >= n)
+          {
+            auto begin_n = start + n;
+            zfwstl::uninitialized_copy(start, begin_n, new_begin);
+            start = new_begin;
+            zfwstl::copy(begin_n, position, old_begin);
+            zfwstl::copy(first, last, position - n);
+          }
+          else
+          {
+            auto mid = first;
+            zfwstl::advance(mid, n - elems_before);
+            zfwstl::uninitialized_copy(first, mid,
+                                       zfwstl::uninitialized_copy(start, position, new_begin));
+            start = new_begin;
+            zfwstl::copy(mid, last, old_begin);
+          }
+        }
+        catch (...)
+        {
+          if (new_begin.node != start.node)
+            for (map_pointer n = new_begin.node; n <= start.node - 1; ++n)
+            {
+              data_allocator::deallocate(*n, start.buffer_size);
+              *n = nullptr;
+            }
+          throw;
+        }
+      }
+      else
+      {
+        reserve_map_at_back();
+        // 原来的迭代器可能会失效
+        auto old_end = finish;
+        auto new_end = finish + n;
+        const auto elems_after = len - elems_before;
+        position = finish - elems_after;
+        try
+        {
+          if (elems_after > n)
+          {
+            auto end_n = finish - n;
+            zfwstl::uninitialized_copy(end_n, finish, finish);
+            finish = new_end;
+            zfwstl::copy_backward(position, end_n, old_end);
+            zfwstl::copy(first, last, position);
+          }
+          else
+          {
+            auto mid = first;
+            zfwstl::advance(mid, elems_after);
+            zfwstl::uninitialized_copy(position, finish,
+                                       zfwstl::uninitialized_copy(mid, last, finish));
+            finish = new_end;
+            zfwstl::copy(first, mid, position);
+          }
+        }
+        catch (...)
+        {
+          if (new_end.node != finish.node)
+            for (map_pointer n = finish.node + 1; n <= new_end.node; ++n)
+            {
+              data_allocator::deallocate(*n, finish.buffer_size);
+              *n = nullptr;
+            }
+          throw;
+        }
+      }
+    }
     void reserve_map_at_back(size_type nodes_to_add = 1)
     {
       // 若 map尾端的节点备用空间不足，则必须重新换一个map(配置更大的，拷贝原来的，释放原来的)
@@ -674,6 +1232,85 @@ namespace zfwstl
       start.set_node(new_nstart);
       finish.set_node(new_nstart + old_num_nodes - 1);
     }
+
+    void fill_assign(size_type n, const value_type &value)
+    {
+      if (n > size())
+      {
+        zfwstl::fill(begin(), end(), value);
+        insert(end(), n - size(), value);
+      }
+      else
+      {
+        erase(begin() + n, end());
+        zfwstl::fill(begin(), end(), value);
+      }
+    }
+    template <class IIter>
+    void copy_assign(IIter first, IIter last, input_iterator_tag)
+    {
+      auto first1 = begin();
+      auto last1 = end();
+      for (; first != last && first1 != last1; ++first, ++first1)
+      {
+        *first1 = *first;
+      }
+      if (first1 != last1)
+      {
+        erase(first1, last1);
+      }
+      else
+      {
+        insert_dispatch(finish, first, last, input_iterator_tag{});
+      }
+    }
+    template <class FIter>
+    void copy_assign(FIter first, FIter last, forward_iterator_tag)
+    {
+      const size_type len1 = size();
+      const size_type len2 = zfwstl::distance(first, last);
+      if (len1 < len2)
+      {
+        auto next = first;
+        zfwstl::advance(next, len1);
+        zfwstl::copy(first, next, start);
+        insert_dispatch(finish, next, last, forward_iterator_tag{});
+      }
+      else
+      {
+        erase(zfwstl::copy(first, last, start), finish);
+      }
+    }
   };
+
+  //========================模板类外重载操作===============
+  // 重载 zfwstl 的 swap
+  template <class U>
+  void swap(deque<U> &lhs, deque<U> &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
+  template <typename T>
+  bool operator==(const deque<T> &lhs, const deque<T> &rhs)
+  {
+    if (lhs.size() != rhs.size())
+      return false;
+    auto tmp1 = lhs.begin();
+    auto tmp2 = rhs.begin();
+    while (tmp1 != lhs.end() && tmp2 != rhs.end())
+    {
+      if (*tmp1 != *tmp2)
+        return false;
+      ++tmp1;
+      ++tmp2;
+    }
+    return true;
+  }
+
+  template <typename T>
+  bool operator!=(const deque<T> &lhs, const deque<T> &rhs)
+  {
+    return !(lhs == rhs);
+  }
 }
 #endif // !ZFWSTL_DEQUE_H_
