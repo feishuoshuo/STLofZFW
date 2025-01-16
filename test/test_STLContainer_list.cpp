@@ -22,7 +22,7 @@ void print_start()
 }
 void print_process(string tmp)
 {
-  std::cout << "[--------------------- " << tmp << " ----------------------]\n";
+  std::cout << "[---- " << tmp << " ----]\n";
 }
 template <class Container>
 void print_element(const Container &con, const std::string &name)

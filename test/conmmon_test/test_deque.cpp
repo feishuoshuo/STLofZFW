@@ -1,9 +1,22 @@
-#include "../STL/deque.h"
+#include "../../STL/deque.h"
+void pri(zfwstl::deque<int, 64> ilist)
+{
+  for (auto ite = ilist.begin(); ite != ilist.end(); ++ite)
+  {
+    std::cout << *ite << ' ';
+  }
+  cout << std::endl;
+}
 int main()
 {
   /**
    * deque:双向开口的[分段]连续性空间
    */
+  // {
+  //   zfwstl::deque<int, 8> d(100, 3);
+  //   d.resize(50);
+  //   d.shrink_to_fit();
+  // }
   zfwstl::deque<int> ideq(20, 9);
   std::cout << "size=" << ideq.size() << std::endl;
 
