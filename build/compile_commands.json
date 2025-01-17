@@ -1,7 +1,7 @@
 [
 {
   "directory": "/home/zhoufeiwei/Desktop/STLofZFW/build/test",
-  "command": "/usr/bin/g++    -g   -std=gnu++14 -o CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack_queue.cpp",
-  "file": "/home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack_queue.cpp"
+  "command": "/usr/bin/g++    -g   -std=gnu++14 -o CMakeFiles/test_sequence_containers.dir/test_STLContainer_priority_queue.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_priority_queue.cpp",
+  "file": "/home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_priority_queue.cpp"
 }
 ]

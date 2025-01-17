@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o"
+  "CMakeFiles/test_sequence_containers.dir/test_STLContainer_priority_queue.cpp.o"
   "test_sequence_containers"
   "test_sequence_containers.pdb"
 )

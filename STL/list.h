@@ -4,12 +4,13 @@
  * 环状双向链表(circle double-link-list)
  * Bidirectional iterators
  */
-#include <cstddef>                   //for size_t, ptrdiff_t
-#include "../src/memory/allocator.h" //标准空间配置器
-#include "../src/iterator.h"         // for bidirectional_iterator_tag, distance
-#include "../src/exceptdef.h"        //for MYSTL_DEBUG, MYSTL_DEBUG
-#include "../src/functional.h"       //函数对象 less<T>()
-#include "../src/util.h"             //for swap, forward
+#include <cstddef>                       //for size_t, ptrdiff_t
+#include "../src/memory/allocator.h"     //标准空间配置器
+#include "../src/iterator.h"             // for bidirectional_iterator_tag, distance
+#include "../src/exceptdef.h"            //for MYSTL_DEBUG, MYSTL_DEBUG
+#include "../src/functional.h"           //函数对象 less<T>()
+#include "../src/util.h"                 //for swap, forward
+#include "../src/algorithms/algorithm.h" //for equal()
 namespace zfwstl
 {
   // ===========================list的节点node结构=============================
@@ -779,18 +780,8 @@ namespace zfwstl
   template <typename T>
   bool operator==(const list<T> &lhs, const list<T> &rhs)
   {
-    if (lhs.size() != rhs.size())
-      return false;
-    auto tmp1 = lhs.begin();
-    auto tmp2 = rhs.begin();
-    while (tmp1 != lhs.end() && tmp2 != rhs.end())
-    {
-      if (*tmp1 != *tmp2)
-        return false;
-      ++tmp1;
-      ++tmp2;
-    }
-    return true;
+    return lhs.size() == rhs.size() &&
+           zfwstl::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
 
   template <typename T>

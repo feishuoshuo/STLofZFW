@@ -5,9 +5,10 @@
  * 1-特别提供了insert_after, erase_after
  * 2-不提供push_back, 仅提供push_front
  */
-#include <cstddef>                   //for size_t, ptrdiff_t
-#include "../src/iterator.h"         //for forward_iterator_tag
-#include "../src/memory/allocator.h" //标准空间配置器
+#include <cstddef>                       //for size_t, ptrdiff_t
+#include "../src/iterator.h"             //for forward_iterator_tag
+#include "../src/memory/allocator.h"     //标准空间配置器
+#include "../src/algorithms/algorithm.h" //for equal()
 namespace zfwstl
 {
   struct __slist_node_base
@@ -42,7 +43,6 @@ namespace zfwstl
     typedef forward_iterator_tag iterator_category; // 单向
 
     __slist_node_base *node;
-
     __slist_iterator_base(__slist_node_base *x) : node(x) {}
 
     void incr() { node = node->next; } // 向前一个节点
@@ -131,10 +131,83 @@ namespace zfwstl
       zfwstl::destroy(&node->data);
       list_node_allocator::deallocate(node);
     }
-
+    // 在当下位置之后插入n个元素x,并返回最后一个元素x
+    iterator fill_init(iterator potision, size_type n, const value_type &x)
+    {
+      for (size_type i = 0; i < n; ++i)
+      {
+        potision = push_front(x);
+      }
+      return potision; // 返回最后一个插入元素
+    }
     list_node_base head; // 头部，不是指针！是实物
   public:
+    // 默认构造
     slist() { head.next = nullptr; }
+    // 拷贝构造函数
+    slist(const slist &other)
+    {
+      head.next = nullptr;
+      for (const_iterator current = other.begin(); current != other.end(); ++current)
+        push_back(*current);
+    }
+    // 移动构造函数
+    slist(slist &&other) noexcept : head(other.head)
+    {
+      other.head.next = nullptr;
+    }
+    // 填充构造
+    slist(size_type n, const T &value)
+    {
+      head.next = nullptr;
+      fill_init(begin(), n, value);
+    }
+    slist(std::initializer_list<T> init)
+    {
+      head.next = nullptr;
+      for (const T &value : init)
+        push_back(value);
+    }
+    template <class Iter,
+              typename std::enable_if<zfwstl::is_input_iterator<Iter>::value, int>::type = 0>
+    slist(Iter first, Iter last)
+    {
+      head.next = nullptr;
+      for (auto it = first; it != last; ++it)
+      {
+        push_back(*it);
+      }
+    }
+    // 拷贝赋值运算符
+    slist &operator=(const slist &other)
+    {
+      if (this != &other)
+      {
+        clear();
+        for (iterator current = other.begin(); current != other.end(); ++current)
+        {
+          push_front(*current);
+        }
+      }
+      return *this;
+    }
+    // 移动赋值运算符
+    slist &operator=(slist &&other) noexcept
+    {
+      if (this != &other)
+      {
+        clear();
+        head = other.head;
+        other.clear();
+      }
+      return *this;
+    }
+    slist &operator=(std::initializer_list<T> ilist)
+    {
+      slist tmp(ilist.begin(), ilist.end());
+      swap(tmp);
+      return *this;
+    }
     ~slist()
     {
       clear(); // 清除所有元素
@@ -159,7 +232,29 @@ namespace zfwstl
       L.head.next = tmp;
     }
     reference front() { return static_cast<list_node *>(head.next)->data; }
-    void push_front(const value_type &x) { __slist_make_link(&head, create_node(x)); }
+    // 头插法
+    iterator push_front(const value_type &x)
+    {
+      list_node *node = create_node(x);
+      __slist_make_link(&head, node);
+      return iterator(node);
+    }
+    // 尾插法
+    iterator push_back(const value_type &x)
+    {
+      list_node *node = create_node(x);
+      if (empty())
+        head.next = node; // 如果链表为空，新节点既是头节点也是尾节点
+      else
+      {
+        // 否则，找到最后一个节点，并在其后插入新节点
+        list_node *current = static_cast<list_node *>(head.next);
+        while (current->next)
+          current = static_cast<list_node *>(current->next);
+        __slist_make_link(current, node);
+      }
+      return iterator(node);
+    }
     void pop_front()
     {
       list_node *node = static_cast<list_node *>(head.next);
@@ -175,6 +270,19 @@ namespace zfwstl
     }
   };
   //========================模板类外重载操作===============
+  template <class T>
+  bool operator==(const slist<T> &lhs, const slist<T> &rhs)
+  {
+    return lhs.size() == rhs.size() &&
+           zfwstl::equal(lhs.begin(), lhs.end(), rhs.begin());
+  }
+
+  template <class T>
+  bool operator!=(const slist<T> &lhs, const slist<T> &rhs)
+  {
+    return !(lhs == rhs);
+  }
+
   // 重载 zfwstl 的 swap
   template <class U>
   void swap(slist<U> &lhs, slist<U> &rhs) noexcept
