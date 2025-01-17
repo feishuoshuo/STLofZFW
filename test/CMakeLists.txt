@@ -1,4 +1,4 @@
-add_executable(test_sequence_containers test_STLContainer_stack.cpp)# 添加测试用例
+add_executable(test_sequence_containers test_STLContainer_stack_queue.cpp)# 添加测试用例
 
 # 链接gtest库: GTest是Google Test库，需要先安装并配置好环境
 # Google Test是一个C++测试框架，用于编写和运行C++的单元测试
