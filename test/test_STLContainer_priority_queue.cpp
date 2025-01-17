@@ -1,20 +1,19 @@
-#ifndef GOOGLETEST_SAMPLES_stack_queue_H_
-#define GOOGLETEST_SAMPLES_stack_queue_H_
+#ifndef GOOGLETEST_SAMPLES_priority_queue_H_
+#define GOOGLETEST_SAMPLES_priority_queue_H_
 #include "../../googletest-1.14.0/googletest/include/gtest/gtest.h"
 #include <iostream>
 #include <cstddef> // for size_t, ptrdiff_t
 #include <string>
-#include "../STL/stack.h"
-#include "../STL/queue.h"
+#include "../STL/priority_queue.h"
 /**
- * SContainerTestStack: 序列容器测试类
+ * SContainerTestPriQue: 序列容器测试类
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
  * -----------------------------------------------------
  */
 void print_start()
 {
   std::cout << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : stack/queue -----------------]\n";
+  std::cout << "[----------------- Run container test : priority queue -----------------]\n";
   std::cout << "[-------------------------- API test ---------------------------]\n";
 }
 void print_process(string tmp)
@@ -32,10 +31,10 @@ void print_element(const Container &con, const std::string &name)
   std::cout << std::endl;
 }
 // 测试类
-class SContainerTestStack : public ::testing::Test
+class SContainerTestPriQue : public ::testing::Test
 {
 protected:
-  zfwstl::stack<int> v1, v2;
+  zfwstl::priority_queue<int> v1, v2;
 
   void SetUp() override
   {
@@ -45,15 +44,15 @@ protected:
 };
 //===============测试用例开始===============
 // 测试构造函数
-TEST_F(SContainerTestStack, Constructor)
+TEST_F(SContainerTestPriQue, Constructor)
 {
 
   print_process("Default constructor");
-  zfwstl::stack<int> v3; // 默认构造
+  zfwstl::priority_queue<int> v3; // 默认构造
   EXPECT_TRUE(v3.empty());
 
   print_process("Fill constructor");
-  zfwstl::stack<int> v4(5, 10); // 填充构造
+  zfwstl::priority_queue<int> v4(5, 10); // 填充构造
   EXPECT_EQ(v4.size(), 5);
   for (int i : v4)
   {
@@ -61,43 +60,43 @@ TEST_F(SContainerTestStack, Constructor)
   }
 
   print_process("Copy constructor");
-  zfwstl::stack<int> v5(v1); // 拷贝构造
+  zfwstl::priority_queue<int> v5(v1); // 拷贝构造
   EXPECT_EQ(v5, v1);
   EXPECT_FALSE(v1.empty());
 
   print_process("Move constructor");
-  zfwstl::stack<int> v6(std::move(v2)); // 移动构造
+  zfwstl::priority_queue<int> v6(std::move(v2)); // 移动构造
   EXPECT_NE(v6, v2);
   EXPECT_TRUE(v2.empty());
 
   print_process("range constructor");
   auto it1 = v2.begin();
   auto it2 = v2.end();
-  zfwstl::stack<int> v7(it1, it2); // 范围构造函数
+  zfwstl::priority_queue<int> v7(it1, it2); // 范围构造函数
   EXPECT_EQ(v7, v2);
 }
 // 测试operator=复制赋值操作符
-TEST_F(SContainerTestStack, AssignmentOperator)
+TEST_F(SContainerTestPriQue, AssignmentOperator)
 {
   print_process("Assignment operator");
-  zfwstl::stack<int> v3 = v1; // 赋值操作运算符
+  zfwstl::priority_queue<int> v3 = v1; // 赋值操作运算符
   EXPECT_EQ(v3, v1);
 
   print_process("initializer_list Assignment operator");
-  zfwstl::stack<int> v4 = zfwstl::stack<int>({4, 5, 6});
+  zfwstl::priority_queue<int> v4 = zfwstl::priority_queue<int>({4, 5, 6});
   EXPECT_EQ(v4.size(), 3);
   EXPECT_EQ(v4.front(), 4);
   EXPECT_EQ(v4.back(), 6);
 
   // 移动赋值操作运算符
   print_process("Move Assignment operator");
-  zfwstl::stack<int> v5 = zfwstl::stack<int>(6, 6);
+  priority_queue<int>(6, 6);
   EXPECT_EQ(v5.size(), 6);
   EXPECT_EQ(v5.front(), 6);
   EXPECT_EQ(v5.back(), 6);
 }
 // 测试 assign 方法
-TEST_F(SContainerTestStack, Assign)
+TEST_F(SContainerTestPriQue, Assign)
 {
   print_process("Fill assignment");
   v1.assign(3, 100); // 填充赋值
@@ -121,7 +120,7 @@ TEST_F(SContainerTestStack, Assign)
   EXPECT_EQ(v1.size(), 9);
 }
 // 测试 push_back, pop_back, emplace_back, emplace 方法
-TEST_F(SContainerTestStack, EmplacePushPopBack)
+TEST_F(SContainerTestPriQue, EmplacePushPopBack)
 {
   print_process("push_back");
   v1.push_back(6);
@@ -145,7 +144,7 @@ TEST_F(SContainerTestStack, EmplacePushPopBack)
   EXPECT_EQ(v1.size(), 7);
 }
 // 测试 insert 方法
-TEST_F(SContainerTestStack, Insert)
+TEST_F(SContainerTestPriQue, Insert)
 {
   print_process("Inserts a single element at the specified position");
   auto it = v1.begin() + 2;
@@ -161,7 +160,7 @@ TEST_F(SContainerTestStack, Insert)
   EXPECT_EQ(v1.size(), 8);
 }
 // 测试 erase 方法
-TEST_F(SContainerTestStack, Erase)
+TEST_F(SContainerTestPriQue, Erase)
 {
   print_process("Erase a single element");
   auto it = v1.begin() + 2;
@@ -176,14 +175,14 @@ TEST_F(SContainerTestStack, Erase)
   EXPECT_EQ(v1[1], 5);
 }
 // 测试 clear 方法
-TEST_F(SContainerTestStack, Clear)
+TEST_F(SContainerTestPriQue, Clear)
 {
   print_process("clear & empty");
   v1.clear();
   EXPECT_TRUE(v1.empty());
 }
 // 测试 swap 方法
-TEST_F(SContainerTestStack, Swap)
+TEST_F(SContainerTestPriQue, Swap)
 {
   print_process("Swap");
   zfwstl::stack<int> v3 = {11, 12, 13, 14, 15};
@@ -197,7 +196,7 @@ TEST_F(SContainerTestStack, Swap)
   }
 }
 // 测试 at 方法
-TEST_F(SContainerTestStack, At)
+TEST_F(SContainerTestPriQue, At)
 {
   print_process("At");
   EXPECT_EQ(v1.at(0), 1);
@@ -206,21 +205,21 @@ TEST_F(SContainerTestStack, At)
   // EXPECT_THROW(v1.at(5), std::out_of_range);
 }
 // 测试 front 和 back 方法
-TEST_F(SContainerTestStack, FrontBack)
+TEST_F(SContainerTestPriQue, FrontBack)
 {
   print_process("front & back");
   EXPECT_EQ(v1.front(), 1);
   EXPECT_EQ(v1.back(), 5);
 }
 // 测试数据成员 size 和 capacity
-TEST_F(SContainerTestStack, SizeCapacity)
+TEST_F(SContainerTestPriQue, SizeCapacity)
 {
   print_process("size & capacity");
   EXPECT_EQ(v1.size(), 5);
   EXPECT_LE(v1.size(), v1.capacity());
 }
 // 测试数据成员 reserve(调整容量), resize(重置容器大小)
-TEST_F(SContainerTestStack, ReserveResize)
+TEST_F(SContainerTestPriQue, ReserveResize)
 {
   print_process("reserve & resize");
   EXPECT_EQ(v1.size(), 5);
@@ -234,7 +233,7 @@ TEST_F(SContainerTestStack, ReserveResize)
   EXPECT_EQ(v1.size(), 10);
 }
 // 测试一系列反向迭代器rbegin, rend()
-TEST_F(SContainerTestStack, BeginEndIterators)
+TEST_F(SContainerTestPriQue, BeginEndIterators)
 {
   print_process("rbegin/end & rcbegin/end");
   auto it = v2.begin();
@@ -263,4 +262,4 @@ int main(int argc, char **argv)
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-#endif // GOOGLETEST_SAMPLES_stack_queue_H_
+#endif // GOOGLETEST_SAMPLES_priority_queue_H_
