@@ -7,7 +7,7 @@
  */
 #include <cstddef>                       //for size_t, ptrdiff_t
 #include "../src/memory/allocator.h"     //标准空间配置器
-#include "../src/algorithms/algorithm.h" //for max(), copy(), copy_backward(), fill()
+#include "../src/algorithms/algorithm.h" //for equal(), lexicographical_compare(), max(), copy(), copy_backward(), fill()
 #include "../src/memory/unintialized.h"  //for uninitialized_fill(), uninitialized_copy()
 #include "../src/exceptdef.h"            //for MYSTL_DEBUG, THROW_OUT_OF_RANGE_IF
 #include "../src/iterator.h"             //for reverse_iterator, distance, is_input_iterator, advance, input_iterator_tag
@@ -1290,27 +1290,37 @@ namespace zfwstl
   {
     lhs.swap(rhs);
   }
-  template <typename T>
+  template <class T>
   bool operator==(const deque<T> &lhs, const deque<T> &rhs)
   {
-    if (lhs.size() != rhs.size())
-      return false;
-    auto tmp1 = lhs.begin();
-    auto tmp2 = rhs.begin();
-    while (tmp1 != lhs.end() && tmp2 != rhs.end())
-    {
-      if (*tmp1 != *tmp2)
-        return false;
-      ++tmp1;
-      ++tmp2;
-    }
-    return true;
+    return lhs.size() == rhs.size() &&
+           zfwstl::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
-
   template <typename T>
   bool operator!=(const deque<T> &lhs, const deque<T> &rhs)
   {
     return !(lhs == rhs);
+  }
+  template <class T>
+  bool operator<(const deque<T> &lhs, const deque<T> &rhs)
+  {
+    return zfwstl::lexicographical_compare(
+        lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+  }
+  template <class T>
+  bool operator>(const deque<T> &lhs, const deque<T> &rhs)
+  {
+    return rhs < lhs;
+  }
+  template <class T>
+  bool operator<=(const deque<T> &lhs, const deque<T> &rhs)
+  {
+    return !(rhs < lhs);
+  }
+  template <class T>
+  bool operator>=(const deque<T> &lhs, const deque<T> &rhs)
+  {
+    return !(lhs < rhs);
   }
 }
 #endif // !ZFWSTL_DEQUE_H_

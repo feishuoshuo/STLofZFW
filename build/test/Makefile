@@ -125,32 +125,32 @@ test_sequence_containers/fast:
 	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/build
 .PHONY : test_sequence_containers/fast
 
-test_STLContainer_stack.o: test_STLContainer_stack.cpp.o
+test_STLContainer_stack_queue.o: test_STLContainer_stack_queue.cpp.o
 
-.PHONY : test_STLContainer_stack.o
+.PHONY : test_STLContainer_stack_queue.o
 
 # target to build an object file
-test_STLContainer_stack.cpp.o:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.o
-.PHONY : test_STLContainer_stack.cpp.o
+test_STLContainer_stack_queue.cpp.o:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o
+.PHONY : test_STLContainer_stack_queue.cpp.o
 
-test_STLContainer_stack.i: test_STLContainer_stack.cpp.i
+test_STLContainer_stack_queue.i: test_STLContainer_stack_queue.cpp.i
 
-.PHONY : test_STLContainer_stack.i
+.PHONY : test_STLContainer_stack_queue.i
 
 # target to preprocess a source file
-test_STLContainer_stack.cpp.i:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.i
-.PHONY : test_STLContainer_stack.cpp.i
+test_STLContainer_stack_queue.cpp.i:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.i
+.PHONY : test_STLContainer_stack_queue.cpp.i
 
-test_STLContainer_stack.s: test_STLContainer_stack.cpp.s
+test_STLContainer_stack_queue.s: test_STLContainer_stack_queue.cpp.s
 
-.PHONY : test_STLContainer_stack.s
+.PHONY : test_STLContainer_stack_queue.s
 
 # target to generate assembly for a file
-test_STLContainer_stack.cpp.s:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.s
-.PHONY : test_STLContainer_stack.cpp.s
+test_STLContainer_stack_queue.cpp.s:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.s
+.PHONY : test_STLContainer_stack_queue.cpp.s
 
 # Help Target
 help:
@@ -161,9 +161,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... test_sequence_containers"
-	@echo "... test_STLContainer_stack.o"
-	@echo "... test_STLContainer_stack.i"
-	@echo "... test_STLContainer_stack.s"
+	@echo "... test_STLContainer_stack_queue.o"
+	@echo "... test_STLContainer_stack_queue.i"
+	@echo "... test_STLContainer_stack_queue.s"
 .PHONY : help
 
 

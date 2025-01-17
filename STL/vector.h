@@ -10,7 +10,7 @@
 // #include "../src/util.h"                 //for forward
 #include "../src/exceptdef.h"            // for 宏MYSTL_DEBUG, THROW_LENGTH_ERROR_IF
 #include "../src/memory/unintialized.h"  // for uninitialized_fill_n() uninitialized_copy(), uninitialized_move()
-#include "../src/algorithms/algorithm.h" // for max(), copy_backward(), fill(), copy()
+#include "../src/algorithms/algorithm.h" // for lexicographical_compare(), equal(), max(), copy_backward(), fill(), copy()
 #include "../src/iterator.h"             // for reverse_iterator, iterator_category()萃取迭代器类型, distance(), advance(), is_input_iterator, forward_iterator_tag
 namespace zfwstl
 {
@@ -582,23 +582,36 @@ namespace zfwstl
   {
     lhs.swap(rhs);
   }
-  template <typename T>
+  template <class T>
   bool operator==(const vector<T> &lhs, const vector<T> &rhs)
   {
-    if (lhs.size() != rhs.size())
-      return false;
-    for (size_t i = 0; i < lhs.size(); ++i)
-    {
-      if (lhs[i] != rhs[i])
-        return false;
-    }
-    return true;
+    return lhs.size() == rhs.size() &&
+           zfwstl::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
-
   template <typename T>
   bool operator!=(const vector<T> &lhs, const vector<T> &rhs)
   {
     return !(lhs == rhs);
+  }
+  template <class T>
+  bool operator<(const vector<T> &lhs, const vector<T> &rhs)
+  {
+    return zfwstl::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+  }
+  template <class T>
+  bool operator>(const vector<T> &lhs, const vector<T> &rhs)
+  {
+    return rhs < lhs;
+  }
+  template <class T>
+  bool operator<=(const vector<T> &lhs, const vector<T> &rhs)
+  {
+    return !(rhs < lhs);
+  }
+  template <class T>
+  bool operator>=(const vector<T> &lhs, const vector<T> &rhs)
+  {
+    return !(lhs < rhs);
   }
 }
 

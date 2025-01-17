@@ -57,27 +57,27 @@ include test/CMakeFiles/test_sequence_containers.dir/progress.make
 # Include the compile flags for this target's objects.
 include test/CMakeFiles/test_sequence_containers.dir/flags.make
 
-test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.o: test/CMakeFiles/test_sequence_containers.dir/flags.make
-test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.o: ../test/test_STLContainer_stack.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.o"
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build/test && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack.cpp
+test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o: test/CMakeFiles/test_sequence_containers.dir/flags.make
+test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o: ../test/test_STLContainer_stack_queue.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/zhoufeiwei/Desktop/STLofZFW/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o"
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build/test && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack_queue.cpp
 
-test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.i"
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build/test && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack.cpp > CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.i
+test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.i"
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build/test && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack_queue.cpp > CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.i
 
-test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.s"
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build/test && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack.cpp -o CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.s
+test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.s"
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build/test && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_stack_queue.cpp -o CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.s
 
 # Object files for target test_sequence_containers
 test_sequence_containers_OBJECTS = \
-"CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.o"
+"CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o"
 
 # External object files for target test_sequence_containers
 test_sequence_containers_EXTERNAL_OBJECTS =
 
-test/test_sequence_containers: test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack.cpp.o
+test/test_sequence_containers: test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_stack_queue.cpp.o
 test/test_sequence_containers: test/CMakeFiles/test_sequence_containers.dir/build.make
 test/test_sequence_containers: /usr/local/lib/libgtest_main.a
 test/test_sequence_containers: /usr/local/lib/libgtest.a

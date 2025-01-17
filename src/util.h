@@ -74,12 +74,12 @@ namespace zfwstl
     pair() : first(Ty1()), second(Ty2()) {}
     constexpr pair(const Ty1 &a, const Ty2 &b) : first(a), second(b) {}
 
-    constexpr pair(Ty1 &&a, const Ty2 &b) : first(std::forward<Ty1>(a)), second(b) {}
+    constexpr pair(Ty1 &&a, const Ty2 &b) : first(zfwstl::forward<Ty1>(a)), second(b) {}
     // 拷贝构造函数
     template <class U1, class U2>
     pair(const pair<U1, U2> &p) : first(p.first), second(p.second) {}
     // 移动构造函数
-    pair(Ty1 &&t1, Ty2 &&t2) : first(std::forward<Ty1>(t1)), second(std::forward<Ty2>(t2)) {}
+    pair(Ty1 &&t1, Ty2 &&t2) : first(zfwstl::forward<Ty1>(t1)), second(zfwstl::forward<Ty2>(t2)) {}
 
     pair(pair &&rhs) = default;
 
