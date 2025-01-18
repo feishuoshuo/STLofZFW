@@ -98,7 +98,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "test/test_STLContainer_rb_tree.cpp",
+			"path" : "test/test_STLContainer_map.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

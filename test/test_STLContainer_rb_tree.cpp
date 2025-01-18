@@ -26,16 +26,6 @@ void print_process(string tmp)
 {
   std::cout << "[---- " << tmp << " ----]\n";
 }
-template <class Container>
-void print_element(const Container &con, const std::string &name)
-{
-  std::cout << name << " contains: ";
-  for (const auto &elem : con)
-  {
-    std::cout << elem << " ";
-  }
-  std::cout << std::endl;
-}
 // KeyOfValue 函数对象(定义一个从值类型中提取键的函数对象)
 template <class Key>
 struct KeyOfValue

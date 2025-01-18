@@ -19,7 +19,7 @@ namespace zfwstl
     typedef Key key_type;
     typedef T data_type;
     typedef T mapped_type;
-    typedef std::pair<const Key, T> value_type; // value是可以之后修改的，但是key！！不行
+    typedef zfwstl::pair<const Key, T> value_type; // value是可以之后修改的，但是key！！不行
     typedef Compare key_compare;
     // TAG: 嵌套类，以下定义一个functor比较函数对象，其作用就是调用 "元素比较函数"
     class value_compare : public binary_function<value_type, value_type, bool>
@@ -69,12 +69,25 @@ namespace zfwstl
     {
       t.insert_unique(ilist.begin(), ilist.end());
     }
-    map(const map<Key, Compare /* ,Alloc */> &rhs) : t(rhs.t) {}
+    // 拷贝构造
+    map(const map &rhs) : t(rhs.t) {}
+    // 移动构造
     map(map &&rhs) noexcept : t(zfwstl::move(rhs.t)) {}
 
-    map<Key, Compare /* ,Alloc */> &operator=(const map<Key, Compare /* ,Alloc */> &x)
+    map &operator=(const map &x)
     {
       t = x.t;
+      return *this;
+    }
+    map &operator=(const map &&x)
+    {
+      t = zfwstl::move(x.t);
+      return *this;
+    }
+    map &operator=(std::initializer_list<value_type> ilist)
+    {
+      t.clear();
+      t.insert_unique(ilist.begin(), ilist.end());
       return *this;
     }
 
@@ -85,22 +98,28 @@ namespace zfwstl
     const_iterator begin() const { return t.begin(); }
     iterator end() { return t.end(); }
     const_iterator end() const { return t.end(); }
-    iterator rend() { return t.rend(); }
-    iterator rbegin() { return t.rbegin(); }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+    const_iterator cbegin() const noexcept { return begin(); }
+    const_iterator cend() const noexcept { return end(); }
+    const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    const_reverse_iterator crend() const noexcept { return rend(); }
     bool empty() { return t.empty(); }
     size_type size() const noexcept { return t.size(); }
     size_type max_size() const noexcept { return t.max_size(); }
     /**
      * value_type(k, T()):创建一个value_type对象
-     * (insert(...)).first：获取insert返回的std::pair中的第一个元素，即指向插入元素的迭代器
+     * (insert(...)).first：获取insert返回的szfwstl::pair中的第一个元素，即指向插入元素的迭代器
      * *((...))：通过迭代器解引用，获取对应的value_type对象
      */
     T &operator[](const key_type &k) { return (*((insert(value_type(k, T()))).first)).second; }
-    void swap(map<Key, Compare> &x) { t.swap(x.t); }
+    void swap(map &x) { t.swap(x.t); }
     //==================插入删除操作==================
     void clear() { t.clear(); }
 
-    typedef std::pair<iterator, bool> pair_iterator_bool;
+    typedef zfwstl::pair<iterator, bool> pair_iterator_bool;
 
     pair_iterator_bool insert(const value_type &x)
     {
@@ -135,9 +154,9 @@ namespace zfwstl
     iterator upper_bound(const key_type &x) { return t.upper_bound(x); }
     const_iterator lower_bound(const key_type &x) const { return t.lower_bound(x); }
     const_iterator upper_bound(const key_type &x) const { return t.upper_bound(x); }
-    std::pair<iterator, iterator>
+    zfwstl::pair<iterator, iterator>
     equal_range(const key_type &x) { return t.equal_range(x); }
-    std::pair<const_iterator, const_iterator>
+    zfwstl::pair<const_iterator, const_iterator>
     equal_range(const key_type &x) const { return t.equal_range(x); }
 
   public:
@@ -146,35 +165,35 @@ namespace zfwstl
   };
 
   // 重载比较操作符
-  template <class Key, class Compare>
-  bool operator==(const map<Key, Compare> &lhs, const map<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator==(const map<Key, T, Compare> &lhs, const map<Key, T, Compare> &rhs)
   {
     return lhs.t == rhs.t;
   }
-  template <class Key, class Compare>
-  bool operator<(const map<Key, Compare> &lhs, const map<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator<(const map<Key, T, Compare> &lhs, const map<Key, T, Compare> &rhs)
   {
     return lhs.t < rhs.t;
   }
-  template <class Key, class Compare>
-  bool operator!=(const map<Key, Compare> &lhs, const map<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator!=(const map<Key, T, Compare> &lhs, const map<Key, T, Compare> &rhs)
   {
-    return !(lhs.t == rhs.t);
+    return !(lhs == rhs);
   }
-  template <class Key, class Compare>
-  bool operator>(const map<Key, Compare> &lhs, const map<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator>(const map<Key, T, Compare> &lhs, const map<Key, T, Compare> &rhs)
   {
-    return rhs.t < lhs.t;
+    return rhs < lhs;
   }
-  template <class Key, class Compare>
-  bool operator<=(const map<Key, Compare> &lhs, const map<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator<=(const map<Key, T, Compare> &lhs, const map<Key, T, Compare> &rhs)
   {
-    return !(rhs.t < lhs.t);
+    return !(rhs < lhs);
   }
-  template <class Key, class Compare>
-  bool operator>=(const map<Key, Compare> &lhs, const map<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator>=(const map<Key, T, Compare> &lhs, const map<Key, T, Compare> &rhs)
   {
-    return !(lhs.t < rhs.t);
+    return !(lhs < rhs);
   }
 }
 

@@ -1,5 +1,5 @@
-#include "../STL_2/set.h"
-#include "../STL_2/map.h"
+#include "../../STL_2/set.h"
+#include "../../STL_2/map.h"
 #include <iostream>
 #include <string>
 int main()
@@ -21,6 +21,10 @@ int main()
   simap["e23"] = 10;
   // std::pair<int, int> value(10, 5);
   // simap.insert(value);
+  zfwstl::map<std::string, int> simap2 = simap;
+  auto res = simap.insert(zfwstl::make_pair(std::string("zhoufeiwei"), 100)); // 在指定位置插入单个元素
+  auto i = (*(res.first)).first;
+
   zfwstl::map<std::string, int>::const_iterator ite1 = simap.begin();
   zfwstl::map<std::string, int>::const_iterator ite2 = simap.end();
   for (; ite1 != ite2; ++ite1)
