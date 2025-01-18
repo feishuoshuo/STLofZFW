@@ -160,7 +160,7 @@ TEST_F(RBTreeTest, InsertEraseCount)
   result = itree.erase_multi(25);
   EXPECT_EQ(result, 3); // 返回删除的元素个数
 }
-TEST_F(RBTreeTest, LowerBound)
+TEST_F(RBTreeTest, LowerUpperBound)
 {
   print_process("lower_bound");
   // 测试存在的键

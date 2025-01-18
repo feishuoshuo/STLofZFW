@@ -7,7 +7,7 @@
 #include <cstddef>             //for size_t, ptrdiff_t
 #include "../src/functional.h" //for less<>, identity
 #include "rb_tree.h"
-#include "../src/util.h" //for  pair<iterator, bool>
+#include "../src/util.h" //for  pair<iterator, bool>, move()
 namespace zfwstl
 {
 
@@ -32,22 +32,43 @@ namespace zfwstl
     typedef typename rep_type::const_reference const_reference;
     typedef typename rep_type::const_iterator iterator; //!!底层迭代器const_iterator
     typedef typename rep_type::const_iterator const_iterator;
-    // TODO：反转迭代器之后补上
+    typedef typename rep_type::const_reverse_iterator reverse_iterator;
+    typedef typename rep_type::const_reverse_iterator const_reverse_iterator;
     typedef typename rep_type::size_type size_type;
     typedef typename rep_type::difference_type difference_type;
 
     set() : t(Compare()) {}
     explicit set(const Compare &comp) : t(comp) {}
+    set(std::initializer_list<value_type> ilist)
+    {
+      t.insert_unique(ilist.begin(), ilist.end());
+    }
     // set不允许相同键值存在->insert_unique
     template <class InputIter>
     set(InputIter first, InputIter last) : t(Compare()) { t.insert_unique(first, last); }
     template <class InputIter>
     set(InputIter first, InputIter last, const Compare &comp) : t(comp) { t.insert_unique(first, last); }
-    set(const set<Key, Compare /* ,Alloc */> &x) : t(x.t) {}
+    set(const set &other) : t(other.t) {}
+    set(set &&other) : t(zfwstl::move(other.t)) {}
+    template <typename K2, typename Compare2>
+    set(const set<K2, Compare2> &other) : t(other.t) {} // 新增的模板构造函数
+    template <typename K2, typename Compare2>
+    set(const set<K2, Compare2> &&x) : t(zfwstl::move(x.t)) {}
 
-    set<Key, Compare /* ,Alloc */> &operator=(const set<Key, Compare /* ,Alloc */> &x)
+    set &operator=(const set &x)
     {
       t = x.t;
+      return *this;
+    }
+    set &operator=(set &&x)
+    {
+      t = zfwstl::move(x.t);
+      return *this;
+    }
+    set &operator=(std::initializer_list<value_type> ilist)
+    {
+      t.clear();
+      t.insert_unique(ilist.begin(), ilist.end());
       return *this;
     }
 
@@ -58,8 +79,14 @@ namespace zfwstl
     const_iterator end() const { return t.end(); }
     iterator begin() { return t.begin(); }
     iterator end() { return t.end(); }
-    iterator rend() { return t.rend(); }
-    iterator rbegin() { return t.rbegin(); }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+    const_iterator cbegin() const noexcept { return begin(); }
+    const_iterator cend() const noexcept { return end(); }
+    const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    const_reverse_iterator crend() const noexcept { return rend(); }
     bool empty() { return t.empty(); }
     size_type size() const noexcept { return t.size(); }
     size_type max_size() const noexcept { return t.max_size(); }
@@ -67,7 +94,7 @@ namespace zfwstl
     //==================插入删除操作==================
     void clear() { t.clear(); }
 
-    typedef std::pair<iterator, bool> pair_iterator_bool;
+    typedef zfwstl::pair<iterator, bool> pair_iterator_bool;
 
     pair_iterator_bool insert(const value_type &x)
     {
@@ -96,7 +123,7 @@ namespace zfwstl
     void erase(iterator first, iterator last) { t.erase(first, last); }
 
     iterator find(const key_type &x) const { return t.find(x); }
-    size_type count(const key_type &x) const { return t.count(x); }
+    size_type count(const key_type &x) const { return t.count_unique(x); }
     iterator lower_bound(const key_type &x) const { return t.lower_bound(x); }
     iterator upper_bound(const key_type &x) const { return t.upper_bound(x); }
     zfwstl::pair<iterator, iterator>
@@ -123,22 +150,22 @@ namespace zfwstl
   template <class Key, class Compare>
   bool operator!=(const set<Key, Compare> &lhs, const set<Key, Compare> &rhs)
   {
-    return !(lhs.t == rhs.t);
+    return !(lhs == rhs);
   }
   template <class Key, class Compare>
   bool operator>(const set<Key, Compare> &lhs, const set<Key, Compare> &rhs)
   {
-    return rhs.t < lhs.t;
+    return rhs < lhs;
   }
   template <class Key, class Compare>
   bool operator<=(const set<Key, Compare> &lhs, const set<Key, Compare> &rhs)
   {
-    return !(rhs.t < lhs.t);
+    return !(rhs < lhs);
   }
   template <class Key, class Compare>
   bool operator>=(const set<Key, Compare> &lhs, const set<Key, Compare> &rhs)
   {
-    return !(lhs.t < rhs.t);
+    return !(lhs < rhs);
   }
 }
 

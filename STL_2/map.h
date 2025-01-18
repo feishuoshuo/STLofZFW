@@ -149,7 +149,7 @@ namespace zfwstl
 
     iterator find(const key_type &x) { return t.find(x); }
     const_iterator find(const key_type &x) const { return t.find(x); }
-    size_type count(const key_type &x) const { return t.count(x); }
+    size_type count(const key_type &x) const { return t.count_unique(x); }
     iterator lower_bound(const key_type &x) { return t.lower_bound(x); }
     iterator upper_bound(const key_type &x) { return t.upper_bound(x); }
     const_iterator lower_bound(const key_type &x) const { return t.lower_bound(x); }

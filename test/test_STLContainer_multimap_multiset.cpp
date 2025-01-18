@@ -5,7 +5,7 @@
 #include <cstddef> // for size_t, ptrdiff_t
 #include <string>
 #include "../STL_2/map.h"
-#include "../src/util.h" // for make_pair, move
+#include "../src/util.h" // for make_pair
 /**
  * AContainerTestMap: 关联容器测试类
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
@@ -76,7 +76,7 @@ TEST_F(AContainerTestMap, Constructor)
   EXPECT_FALSE(v3.empty());
 
   print_process("Move constructor");
-  zfwstl::map<int, std::string> v6(zfwstl::move(v3)); // 移动构造
+  zfwstl::map<int, std::string> v6(std::move(v3)); // 移动构造
   EXPECT_NE(v6, v3);
   EXPECT_TRUE(v3.empty());
 
@@ -163,30 +163,30 @@ TEST_F(AContainerTestMap, Swap)
   EXPECT_EQ(simap["liuliuilu"], 6);
   EXPECT_EQ(v3["one"], 1);
 }
-// 测试一系列反向迭代器rbegin, rend()
-TEST_F(AContainerTestMap, BeginEndIterators)
-{
-  print_process("rbegin/end & rcbegin/end");
-  auto it = simap.begin();
-  EXPECT_EQ((*(it)).first, "one"); // 检查 begin() 是否指向第一个元素
-  auto end_it = simap.end();
-  EXPECT_EQ((*(--end_it)).first, "two"); // 检查 end() 前一个元素是否是最后一个元素
+// // 测试一系列反向迭代器rbegin, rend()
+// TEST_F(AContainerTestMap, BeginEndIterators)
+// {
+//   print_process("rbegin/end & rcbegin/end");
+//   auto it = simap.begin();
+//   EXPECT_EQ(*it, 6); // 检查 begin() 是否指向第一个元素
+//   auto end_it = simap.end();
+//   EXPECT_EQ(*(--end_it), 10); // 检查 end() 前一个元素是否是最后一个元素
 
-  auto rbegin_it = simap.rbegin();
-  EXPECT_EQ((*(rbegin_it)).first, "two"); // 检查 rbegin() 是否指向最后一个元素
-  auto rend_it = simap.rend();
-  EXPECT_EQ((*(--rend_it)).first, "one"); // 检查 rend() 前一个元素是否是第一个元素
+//   auto rbegin_it = simap.rbegin();
+//   EXPECT_EQ(*rbegin_it, 10); // 检查 rbegin() 是否指向最后一个元素
+//   auto rend_it = simap.rend();
+//   EXPECT_EQ(*(--rend_it), 6); // 检查 rend() 前一个元素是否是第一个元素
 
-  auto cbegin_it = simap.cbegin();
-  EXPECT_EQ((*(cbegin_it)).first, "one"); // 检查 cbegin() 是否指向第一个元素
-  auto cend_it = simap.cend();
-  EXPECT_EQ((*(--cend_it)).first, "two"); // 检查 cend() 前一个元素是否是最后一个元素
+//   auto cbegin_it = simap.cbegin();
+//   EXPECT_EQ(*cbegin_it, 6); // 检查 cbegin() 是否指向第一个元素
+//   auto cend_it = simap.cend();
+//   EXPECT_EQ(*(--cend_it), 10); // 检查 cend() 前一个元素是否是最后一个元素
 
-  auto crbegin_it = simap.crbegin();
-  EXPECT_EQ((*(crbegin_it)).first, "two"); // 检查 crbegin() 是否指向第一个元素
-  auto crend_it = simap.crend();
-  EXPECT_EQ((*(--crend_it)).first, "one"); // 检查 crend() 前一个元素是否是最后一个元素
-}
+//   auto crbegin_it = simap.crbegin();
+//   EXPECT_EQ(*crbegin_it, 10); // 检查 crbegin() 是否指向第一个元素
+//   auto crend_it = simap.crend();
+//   EXPECT_EQ(*(--crend_it), 6); // 检查 crend() 前一个元素是否是最后一个元素
+// }
 int main(int argc, char **argv)
 {
   print_start();

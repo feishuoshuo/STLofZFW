@@ -8,7 +8,17 @@ int main()
    * set map
    */
   // 自定义比较类，这里以忽略大小写的字符串比较为例
+  string arr[] = {"c1", "a2", "v4", "o8", "@10"};
+  zfwstl::set<std::string> v3{arr, arr + 5};
+  zfwstl::set<std::string> v6(zfwstl::move(v3));
+  zfwstl::set<int> v90;
+  v90.insert(15);
+  v90.insert(16);
+  v90.insert(15);
+  v90.insert(17);
+  auto range = v90.equal_range(15);
 
+  std::cout << (v6 != v3) << std::endl;
   zfwstl::map<std::string, int> simap;
   // simap.insert(std::make_pair(17, 1));
   // simap.insert(std::make_pair(18, 2));
