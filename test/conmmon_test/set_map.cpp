@@ -20,6 +20,8 @@ int main()
 
   std::cout << (v6 != v3) << std::endl;
   zfwstl::map<std::string, int> simap;
+  auto it = simap.lower_bound("one");
+  auto j = *(it);
   // simap.insert(std::make_pair(17, 1));
   // simap.insert(std::make_pair(18, 2));
   // simap.insert(std::make_pair(23, 3));
@@ -42,7 +44,8 @@ int main()
     std::cout << (*ite1).first << "=" << (*ite1).second << " ";
   }
   std::cout << std::endl;
-
+  zfwstl::map<std::string, int> simap3 = simap;
+  std::cout << (simap3 == simap) << std::endl;
   // zfwstl::map<string, int>::iterator simap_iter = simap.begin();
   // for (; simap_iter != simap.end(); ++simap_iter)
   //   cout << simap_iter->first << ' '

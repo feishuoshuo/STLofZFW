@@ -163,6 +163,49 @@ TEST_F(AContainerTestMap, Swap)
   EXPECT_EQ(simap["liuliuilu"], 6);
   EXPECT_EQ(v3["one"], 1);
 }
+TEST_F(AContainerTestMap, LowerUpperBound)
+{
+  priMap();
+  auto ite1 = simap.find(string("one"));
+  EXPECT_TRUE(ite1 != simap.end());
+
+  print_process("lower_bound");
+  auto it = simap.lower_bound("one");
+  EXPECT_TRUE(it != simap.end());
+  EXPECT_EQ((*(it)).first, "one");
+
+  it = simap.lower_bound("two");
+  EXPECT_TRUE(it != simap.end());
+  EXPECT_EQ((*(it)).first, "one");
+
+  it = simap.lower_bound("three");
+  EXPECT_TRUE(it != simap.end());
+  EXPECT_EQ((*(it)).first, "one");
+
+  print_process("upper_bound");
+  it = simap.upper_bound("one");
+  EXPECT_EQ((*(it)).second, 3);
+
+  it = simap.upper_bound("two");
+  EXPECT_TRUE(it != simap.end());
+  EXPECT_EQ((*(it)).second, 2);
+
+  it = simap.upper_bound("three");
+  EXPECT_TRUE(it == simap.end());
+
+  print_process("equal_range");
+  simap.insert(zfwstl::make_pair(std::string("four"), 4));
+  simap.insert(zfwstl::make_pair(std::string("five"), 5));
+  simap.insert(zfwstl::make_pair(std::string("five"), 5));
+  simap.insert(zfwstl::make_pair(std::string("six"), 6));
+  // 测试存在的键
+  auto range = simap.equal_range("five");
+  EXPECT_EQ(simap.count("five"), 1);
+
+  // 测试不存在的键
+  range = simap.equal_range("zhoufeiwei");
+  EXPECT_EQ(simap.count("zhoufeiwei"), 0);
+}
 // 测试一系列反向迭代器rbegin, rend()
 TEST_F(AContainerTestMap, BeginEndIterators)
 {

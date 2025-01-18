@@ -191,7 +191,7 @@ TEST_F(AContainerTestSet, LowerUpperBound)
 
   // 测试不存在的键
   range = siset.equal_range(99);
-  EXPECT_EQ(range.first, range.second);
+  EXPECT_EQ(siset.count(99), 0);
 }
 // 测试一系列反向迭代器rbegin, rend()
 TEST_F(AContainerTestSet, BeginEndIterators)

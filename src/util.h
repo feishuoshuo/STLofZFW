@@ -71,7 +71,7 @@ namespace zfwstl
     first_type first;   // 保存第一个数据
     second_type second; // 保存第二个数据
 
-    pair() : first(Ty1()), second(Ty2()) {}
+    explicit pair() : first(Ty1()), second(Ty2()) {}
     constexpr pair(const Ty1 &a, const Ty2 &b) : first(a), second(b) {}
 
     constexpr pair(Ty1 &&a, const Ty2 &b) : first(zfwstl::forward<Ty1>(a)), second(b) {}
