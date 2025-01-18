@@ -1,7 +1,7 @@
 #ifndef ZFWINYSTL_FUNCTIONAL_H_
 #define ZFWINYSTL_FUNCTIONAL_H_
 /**
- * 包含了 mystl 的函数对象与哈希函数
+ * 包含了 zfwstl 的函数对象与哈希函数
  */
 #include <cstddef> //for size_t
 namespace zfwstl

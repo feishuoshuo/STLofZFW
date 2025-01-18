@@ -53,7 +53,8 @@ namespace zfwstl
     typedef typename rep_type::const_reference const_reference;
     typedef typename rep_type::iterator iterator; // 注意与set区别，因为map的value值不参与红黑树节点排布，因此可改变
     typedef typename rep_type::const_iterator const_iterator;
-    // TODO：反转迭代器之后补上
+    typedef typename rep_type::reverse_iterator reverse_iterator;
+    typedef typename rep_type::const_reverse_iterator const_reverse_iterator;
     typedef typename rep_type::size_type size_type;
     typedef typename rep_type::difference_type difference_type;
 
@@ -64,7 +65,12 @@ namespace zfwstl
     map(InputIter first, InputIter last) : t(Compare()) { t.insert_unique(first, last); }
     template <class InputIter>
     map(InputIter first, InputIter last, const Compare &comp) : t(comp) { t.insert_unique(first, last); }
-    map(const map<Key, Compare /* ,Alloc */> &x) : t(x.t) {}
+    map(std::initializer_list<value_type> ilist) : t()
+    {
+      t.insert_unique(ilist.begin(), ilist.end());
+    }
+    map(const map<Key, Compare /* ,Alloc */> &rhs) : t(rhs.t) {}
+    map(map &&rhs) noexcept : t(zfwstl::move(rhs.t)) {}
 
     map<Key, Compare /* ,Alloc */> &operator=(const map<Key, Compare /* ,Alloc */> &x)
     {

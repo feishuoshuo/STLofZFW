@@ -4,11 +4,12 @@
  * RB tree红黑树
  * 左根右 根叶黑 不红红 黑路同
  */
-#include <cstddef>                   //for size_t, ptrdiff_t
-#include "../src/iterator.h"         //for bidirectional_iterator_tag, distance
-#include "../src/memory/allocator.h" //标准空间配置器
-#include "../src/util.h"             //for pair<iterator,bool>, swap
-#include "../src/exceptdef.h"        //for THROW_LENGTH_ERROR_IF
+#include <cstddef>                       //for size_t, ptrdiff_t
+#include "../src/iterator.h"             //for bidirectional_iterator_tag, distance
+#include "../src/memory/allocator.h"     //标准空间配置器
+#include "../src/util.h"                 //for pair<iterator,bool>, swap, move()
+#include "../src/exceptdef.h"            //for THROW_LENGTH_ERROR_IF
+#include "../src/algorithms/algorithm.h" //for equal(), lexicographical_compare()
 namespace zfwstl
 {
   typedef bool __rb_tree_color_type;
@@ -159,6 +160,8 @@ namespace zfwstl
       decrement();
       return tmp;
     }
+    bool operator==(const self &other) const { return node == other.node; }
+    bool operator!=(const self &other) const { return !(*this == other); }
   };
   //===============================rb_tree==========================
   // KeyOfValue用于从值类型中提取Key
@@ -184,6 +187,8 @@ namespace zfwstl
 
     typedef __rb_tree_iterator<value_type, reference, pointer> iterator;
     typedef __rb_tree_iterator<value_type, const_reference, const_pointer> const_iterator;
+    typedef zfwstl::reverse_iterator<iterator> reverse_iterator;
+    typedef zfwstl::reverse_iterator<const_iterator> const_reverse_iterator;
 
   protected:
     size_type node_count; // 记录数的大小=节点个数
@@ -250,17 +255,61 @@ namespace zfwstl
     }
 
   public:
-    // 构造、复制、移动、析构函数
-    // default constructor
     rb_tree(const Compare &comp = Compare()) : node_count(0), key_compare(comp) { init(); }
+    // 拷贝构造
+    rb_tree(const rb_tree &rhs)
+    {
+      init();
+      if (rhs.node_count != 0)
+      {
+        root() = static_cast<link_type>(copy_from(rhs.root(), header));
+        leftmost() = minimum(root());
+        rightmost() = maximum(root());
+      }
+      node_count = rhs.node_count;
+      key_compare = rhs.key_compare;
+    }
+    // 移动构造
+    rb_tree(rb_tree &&rhs) noexcept : header(zfwstl::move(rhs.header)),
+                                      node_count(rhs.node_count),
+                                      key_compare(rhs.key_compare)
+    {
+      rhs.header = nullptr;
+      rhs.node_count = 0;
+    }
     ~rb_tree()
     {
       clear();
       pop_node(header);
     }
     //=================operator操作运算符重载=====================
-    // TODO：操作符重载=
-    rb_tree &operator=(const rb_tree &rhs);
+    rb_tree &operator=(const rb_tree &rhs)
+    {
+      if (this != &rhs)
+      {
+        clear();
+        if (rhs.node_count != 0)
+        {
+          root() = copy_from(rhs.root(), header);
+          leftmost() = minimum(root());
+          rightmost() = maximum(root());
+        }
+
+        node_count = rhs.node_count;
+        key_compare = rhs.key_compare;
+      }
+      return *this;
+    }
+    rb_tree &operator=(rb_tree &&rhs)
+    {
+      clear();
+      header = zfwstl::move(rhs.header);
+      node_count = rhs.node_count;
+      key_compare = rhs.key_compare;
+      rhs.header = nullptr;
+      rhs.node_count = 0;
+      return *this;
+    }
 
     void swap(rb_tree &rhs)
     {
@@ -285,8 +334,14 @@ namespace zfwstl
     iterator end() { return header; }
     const_iterator begin() const { return const_iterator(leftmost()); }
     const_iterator end() const { return const_iterator(header); }
-    iterator rend();
-    iterator rbegin();
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+    const_iterator cbegin() const noexcept { return begin(); }
+    const_iterator cend() const noexcept { return end(); }
+    const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    const_reverse_iterator crend() const noexcept { return rend(); }
 
     iterator find(const Key &k)
     {
@@ -302,7 +357,7 @@ namespace zfwstl
            * 在C++中，逗号运算符会顺序执行两个表达式，并返回最后一个表达式的结果。
            * 在这个上下文中，逗号运算符被用来同时更新y和x的值。
            */
-          y = x, x = x->left;
+          y = x, x = static_cast<link_type>(x->left);
         }
         else // key 大于 x 键值，向右走
           x = right(x);
@@ -324,7 +379,7 @@ namespace zfwstl
            * 在C++中，逗号运算符会顺序执行两个表达式，并返回最后一个表达式的结果。
            * 在这个上下文中，逗号运算符被用来同时更新y和x的值。
            */
-          y = x, x = x->left;
+          y = x, x = static_cast<link_type>(x->left);
         }
         else // key 大于 x 键值，向右走
           x = right(x);
@@ -332,6 +387,7 @@ namespace zfwstl
       const_iterator j = const_iterator(y);
       return (j == end() || key_compare(k, key(j.node))) ? end() : j;
     }
+
     void clear()
     {
       if (node_count != 0)
@@ -343,6 +399,7 @@ namespace zfwstl
         node_count = 0;
       }
     }
+    // 删除 hint 位置的节点
     void erase(iterator hint)
     {
       auto y = rb_tree_erase_rebalance(hint.node, header->parent, header->left, header->right);
@@ -358,12 +415,22 @@ namespace zfwstl
           erase(__first++);
     }
     // 删除键值等于 key 的元素，返回删除的个数
-    size_type erase(const key_type &x)
+    size_type erase_multi(const key_type &x)
     {
       auto __p = equal_range(x);
       auto n = zfwstl::distance(__p.first, __p.second);
       erase(__p.first, __p.second);
       return n;
+    }
+    size_type erase_unique(const key_type &key)
+    {
+      auto it = find(key);
+      if (it != end())
+      {
+        erase(it);
+        return 1;
+      }
+      return 0;
     }
 
     iterator copy(iterator x, iterator p);
@@ -374,14 +441,13 @@ namespace zfwstl
     }
     size_type count_multi(const key_type &key) const
     {
-      auto p = equal_range_multi(key);
+      auto p = equal_range(key);
       return static_cast<size_type>(zfwstl::distance(p.first, p.second));
     }
     //=====================修改红黑树相关操作insert, erase=====================
     // 被插入节点的key在整棵树中，必须是独一无二的
     // 若树中已有相同key，插入操作不会真正进行
-    // TODO:有问题！！！pair
-    std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare>::iterator, bool>
+    zfwstl::pair<typename rb_tree<Key, Value, KeyOfValue, Compare>::iterator, bool>
     insert_unique(const value_type &v)
     {
       link_type y = header;
@@ -398,15 +464,15 @@ namespace zfwstl
       if (comp)
       {
         if (j == begin())
-          return std::pair<iterator, bool>(__insert(x, y, v), true);
+          return zfwstl::pair<iterator, bool>(__insert(x, y, v), true);
         else
           --j;
       }
       if (key_compare(key(j.node), KeyOfValue()(v))) // j指向的节点值小于v值，x新插入点在右子节点
-        return std::pair<iterator, bool>(__insert(x, y, v), true);
+        return zfwstl::pair<iterator, bool>(__insert(x, y, v), true);
 
       // 至此，新值v一定与树中键值重复，则不插入
-      return std::pair<iterator, bool>(j, false);
+      return zfwstl::pair<iterator, bool>(j, false);
     }
     void insert_unique(const_iterator __first, const_iterator __last)
     {
@@ -459,13 +525,6 @@ namespace zfwstl
         insert_equal(*first);
     }
     //==========================
-    size_type count(const key_type &k) const
-    {
-      // TODO
-      auto p = equal_range(k);
-      return static_cast<size_type>(zfwstl::distance(p.first, p.second));
-      ;
-    }
     iterator lower_bound(const key_type &k)
     {
       link_type y = header; // 最后一个不小于K的节点
@@ -518,13 +577,14 @@ namespace zfwstl
 
       return iterator(y);
     }
-    std::pair<iterator, iterator> equal_range(const key_type &k)
+    // 在容器中所有相等元素的范围
+    zfwstl::pair<iterator, iterator> equal_range(const key_type &k)
     {
-      return std::pair<iterator, iterator>(lower_bound(k), upper_bound(k));
+      return zfwstl::pair<iterator, iterator>(lower_bound(k), upper_bound(k));
     }
-    std::pair<const_iterator, const_iterator> equal_range(const key_type &k) const
+    zfwstl::pair<const_iterator, const_iterator> equal_range(const key_type &k) const
     {
-      return std::pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k));
+      return zfwstl::pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k));
     }
 
   private:
@@ -566,6 +626,7 @@ namespace zfwstl
       root() = nullptr;
       leftmost() = header;  // 令header左子节点为自己
       rightmost() = header; // 令header右子节点为自己
+      node_count = 0;
     }
     // 从 x 节点开始删除该节点及其子树
     void erase_since(base_ptr x)
@@ -837,7 +898,80 @@ namespace zfwstl
       }
       return d;
     }
+    // 递归复制一颗树，节点从 x 开始，p 为 x 的父节点
+    base_ptr copy_from(base_ptr x, base_ptr p)
+    {
+      auto top = clone_node(static_cast<link_type>(x));
+      top->parent = p;
+      try
+      {
+        if (x->right)
+          top->right = copy_from(x->right, top);
+        p = top;
+        x = x->left;
+        while (x != nullptr)
+        {
+          auto y = clone_node(static_cast<link_type>(x));
+          p->left = y;
+          y->parent = p;
+          if (x->right)
+            y->right = copy_from(x->right, y);
+          p = y;
+          x = x->left;
+        }
+      }
+      catch (...)
+      {
+        erase_since(top);
+        throw;
+      }
+      return top;
+    }
   };
+
+  // 重载比较操作符
+  template <class Key, class Value, class KeyOfValue, class Compare>
+  bool operator==(const rb_tree<Key, Value, KeyOfValue, Compare> &lhs, const rb_tree<Key, Value, KeyOfValue, Compare> &rhs)
+  {
+    return lhs.size() == rhs.size() && zfwstl::equal(lhs.begin(), lhs.end(), rhs.begin());
+  }
+
+  template <class Key, class Value, class KeyOfValue, class Compare>
+  bool operator<(const rb_tree<Key, Value, KeyOfValue, Compare> &lhs, const rb_tree<Key, Value, KeyOfValue, Compare> &rhs)
+  {
+    return zfwstl::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+  }
+
+  template <class Key, class Value, class KeyOfValue, class Compare>
+  bool operator!=(const rb_tree<Key, Value, KeyOfValue, Compare> &lhs, const rb_tree<Key, Value, KeyOfValue, Compare> &rhs)
+  {
+    return !(lhs == rhs);
+  }
+
+  template <class Key, class Value, class KeyOfValue, class Compare>
+  bool operator>(const rb_tree<Key, Value, KeyOfValue, Compare> &lhs, const rb_tree<Key, Value, KeyOfValue, Compare> &rhs)
+  {
+    return rhs < lhs;
+  }
+
+  template <class Key, class Value, class KeyOfValue, class Compare>
+  bool operator<=(const rb_tree<Key, Value, KeyOfValue, Compare> &lhs, const rb_tree<Key, Value, KeyOfValue, Compare> &rhs)
+  {
+    return !(rhs < lhs);
+  }
+
+  template <class Key, class Value, class KeyOfValue, class Compare>
+  bool operator>=(const rb_tree<Key, Value, KeyOfValue, Compare> &lhs, const rb_tree<Key, Value, KeyOfValue, Compare> &rhs)
+  {
+    return !(lhs < rhs);
+  }
+
+  // 重载 zfwstl 的 swap
+  template <class Key, class Value, class KeyOfValue, class Compare>
+  void swap(rb_tree<Key, Value, KeyOfValue, Compare> &lhs, rb_tree<Key, Value, KeyOfValue, Compare> &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 }
 
 #endif // !ZFWSTL_RB_TREE_H_
