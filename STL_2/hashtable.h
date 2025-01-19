@@ -427,7 +427,7 @@ namespace zfwstl
       return tmp->val;
     }
 
-    void erase(iterator position)
+    void erase(const_iterator position)
     {
       auto p = position.cur;
       if (p)
@@ -461,7 +461,7 @@ namespace zfwstl
         }
       }
     }
-    void erase(iterator first, iterator last)
+    void erase(const_iterator first, const_iterator last)
     {
       if (first.cur == last.cur)
         return;

@@ -139,7 +139,6 @@ namespace zfwstl
     size_type erase(const key_type &key) { return rep.erase(key); }
     void erase(iterator it) { rep.erase(it); }
     void erase(iterator first, iterator last) { rep.erase(first, last); }
-
     void clear() { rep.clear(); }
 
   public:
