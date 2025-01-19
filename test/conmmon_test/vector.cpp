@@ -18,17 +18,18 @@ int main()
   // std::cout << "empty=" << vec.empty() << std::endl;
   std::cout << "end()=" << vec.back() << std::endl;
   vec.push_back(6);
+  zfwstl::vector<int> vec33(zfwstl::move(vec));
   // 扩容的查看
   //  std::cout << "end()=" << vec.back() << std::endl;
   //  std::cout << "top=" << vec.front() << std::endl;
   //  std::cout << "size=" << vec.size() << std::endl;
   //  std::cout << "capacity=" << vec.capacity() << std::endl;
 
-  auto p = vec.data();
-  vec.insert(++p, 2, 10);
-  for (size_t i = 0; i < vec.size(); i++)
+  auto p = vec33.data();
+  vec33.insert(++p, 2, 10);
+  for (size_t i = 0; i < vec33.size(); i++)
   {
-    std::cout << vec[i] << " ";
+    std::cout << vec33[i] << " ";
   }
 
   return 0;

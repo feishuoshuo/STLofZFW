@@ -1,5 +1,6 @@
-#include "../STL_2/hashtable.h"
-#include "../src/functional.h" //for hash<int>
+#include "../../STL_2/hashtable.h"
+#include "../../src/functional.h" //for hash<int>
+#include "../../src/util.h"
 int main()
 {
   /**
@@ -20,26 +21,31 @@ int main()
   iht.insert_unique(108);
   iht.insert_unique(2);
   iht.insert_unique(53);
-  iht.insert_unique(55);
-  // cout << iht.size() << endl;
-
-  // 声明hashtable迭代器
-  // 使用auto可以避免上述长串，注意auto做函数返回类型时不会是引用
-  auto ite = iht.begin();
-
-  // 使用迭代器遍历hashtable输出所有节点值
-  for (int i = 0; i < iht.size(); ++i, ++ite)
-    cout << *ite << ' ';
-  std::cout << std::endl;
+  iht.insert_equal(53);
+  iht.insert_equal(53);
+  iht.insert_equal(53);
 
   // 遍历所有buckets，如果节点个数不为0则打印
   for (int i = 0; i < iht.bucket_count(); ++i)
   {
     int n = iht.elems_in_bucket(i);
     if (n != 0)
-      cout << "bucket[" << i << "] has " << n << " elems." << endl;
+    {
+      cout << "bucket[" << i << "] has " << n << " elems:" << endl;
+      auto bucket = iht.get_buckets()[i];
+      while (bucket)
+      {
+        auto key = iht.get_key_function()(bucket->val); // 使用公共访问器函数
+        auto count = iht.count(key);
+        auto bucket_index = iht.bucket_index_of(key); // 获取键值所在的桶的索引
+        cout << "  key: " << key << ", value: " << bucket->val << ", count: " << count << ", bucket index: " << bucket_index << endl;
+        bucket = bucket->next;
+      }
+    }
   }
 
+  auto result = iht.erase_multi(53);
+  std::cout << result << std::endl;
   // // 验证bucket(list)的容量就是buckets vector的大小
   // for (int i = 0; i <= 47; ++i)
   // {
