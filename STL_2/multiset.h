@@ -31,7 +31,8 @@ namespace zfwstl
     typedef typename rep_type::const_reference const_reference;
     typedef typename rep_type::const_iterator iterator; //!!底层迭代器const_iterator
     typedef typename rep_type::const_iterator const_iterator;
-    // TODO：反转迭代器之后补上
+    typedef typename rep_type::const_reverse_iterator reverse_iterator;
+    typedef typename rep_type::const_reverse_iterator const_reverse_iterator;
     typedef typename rep_type::size_type size_type;
     typedef typename rep_type::difference_type difference_type;
 
@@ -42,11 +43,28 @@ namespace zfwstl
     multiset(InputIter first, InputIter last) : t(Compare()) { t.insert_equal(first, last); }
     template <class InputIter>
     multiset(InputIter first, InputIter last, const Compare &comp) : t(comp) { t.insert_equal(first, last); }
-    multiset(const multiset<Key, Compare /* ,Alloc */> &x) : t(x.t) {}
+    multiset(std::initializer_list<value_type> ilist)
+        : t()
+    {
+      t.insert_equal(ilist.begin(), ilist.end());
+    }
 
-    multiset<Key, Compare /* ,Alloc */> &operator=(const multiset<Key, Compare /* ,Alloc */> &x)
+    multiset(const multiset &x) : t(x.t) {}
+    multiset(multiset &&x) : t(zfwstl::move(x.t)) {}
+    multiset &operator=(const multiset &x)
     {
       t = x.t;
+      return *this;
+    }
+    multiset &operator=(multiset &&rhs)
+    {
+      t = zfwstl::move(rhs.t);
+      return *this;
+    }
+    multiset &operator=(std::initializer_list<value_type> ilist)
+    {
+      t.clear();
+      t.insert_equal(ilist.begin(), ilist.end());
       return *this;
     }
 
@@ -57,8 +75,14 @@ namespace zfwstl
     const_iterator end() const { return t.end(); }
     iterator begin() { return t.begin(); }
     iterator end() { return t.end(); }
-    iterator rend() { return t.rend(); }
-    iterator rbegin() { return t.rbegin(); }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+    const_iterator cbegin() const noexcept { return begin(); }
+    const_iterator cend() const noexcept { return end(); }
+    const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    const_reverse_iterator crend() const noexcept { return rend(); }
     bool empty() { return t.empty(); }
     size_type size() const noexcept { return t.size(); }
     size_type max_size() const noexcept { return t.max_size(); }
@@ -122,22 +146,22 @@ namespace zfwstl
   template <class Key, class Compare>
   bool operator!=(const multiset<Key, Compare> &lhs, const multiset<Key, Compare> &rhs)
   {
-    return !(lhs.t == rhs.t);
+    return !(lhs == rhs);
   }
   template <class Key, class Compare>
   bool operator>(const multiset<Key, Compare> &lhs, const multiset<Key, Compare> &rhs)
   {
-    return rhs.t < lhs.t;
+    return rhs < lhs;
   }
   template <class Key, class Compare>
   bool operator<=(const multiset<Key, Compare> &lhs, const multiset<Key, Compare> &rhs)
   {
-    return !(rhs.t < lhs.t);
+    return !(rhs < lhs);
   }
   template <class Key, class Compare>
   bool operator>=(const multiset<Key, Compare> &lhs, const multiset<Key, Compare> &rhs)
   {
-    return !(lhs.t < rhs.t);
+    return !(lhs < rhs);
   }
 
 }

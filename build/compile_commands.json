@@ -1,7 +1,7 @@
 [
 {
   "directory": "/home/zhoufeiwei/Desktop/STLofZFW/build/test",
-  "command": "/usr/bin/g++    -g   -std=gnu++14 -o CMakeFiles/test_sequence_containers.dir/test_STLContainer_multimap_multiset.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_multimap_multiset.cpp",
-  "file": "/home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_multimap_multiset.cpp"
+  "command": "/usr/bin/g++    -g   -std=gnu++14 -o CMakeFiles/test_sequence_containers.dir/test_STLContainer_multiset.cpp.o -c /home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_multiset.cpp",
+  "file": "/home/zhoufeiwei/Desktop/STLofZFW/test/test_STLContainer_multiset.cpp"
 }
 ]

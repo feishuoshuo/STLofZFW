@@ -18,7 +18,7 @@
 void print_start()
 {
   std::cout << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : multi_map & multi_set -----------------]\n";
+  std::cout << "[----------------- Run container test : multi_map -----------------]\n";
   std::cout << "[-------------------------- API test ---------------------------]\n";
 }
 void print_process(string tmp)

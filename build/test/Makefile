@@ -125,32 +125,32 @@ test_sequence_containers/fast:
 	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/build
 .PHONY : test_sequence_containers/fast
 
-test_STLContainer_multimap_multiset.o: test_STLContainer_multimap_multiset.cpp.o
+test_STLContainer_multiset.o: test_STLContainer_multiset.cpp.o
 
-.PHONY : test_STLContainer_multimap_multiset.o
+.PHONY : test_STLContainer_multiset.o
 
 # target to build an object file
-test_STLContainer_multimap_multiset.cpp.o:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_multimap_multiset.cpp.o
-.PHONY : test_STLContainer_multimap_multiset.cpp.o
+test_STLContainer_multiset.cpp.o:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_multiset.cpp.o
+.PHONY : test_STLContainer_multiset.cpp.o
 
-test_STLContainer_multimap_multiset.i: test_STLContainer_multimap_multiset.cpp.i
+test_STLContainer_multiset.i: test_STLContainer_multiset.cpp.i
 
-.PHONY : test_STLContainer_multimap_multiset.i
+.PHONY : test_STLContainer_multiset.i
 
 # target to preprocess a source file
-test_STLContainer_multimap_multiset.cpp.i:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_multimap_multiset.cpp.i
-.PHONY : test_STLContainer_multimap_multiset.cpp.i
+test_STLContainer_multiset.cpp.i:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_multiset.cpp.i
+.PHONY : test_STLContainer_multiset.cpp.i
 
-test_STLContainer_multimap_multiset.s: test_STLContainer_multimap_multiset.cpp.s
+test_STLContainer_multiset.s: test_STLContainer_multiset.cpp.s
 
-.PHONY : test_STLContainer_multimap_multiset.s
+.PHONY : test_STLContainer_multiset.s
 
 # target to generate assembly for a file
-test_STLContainer_multimap_multiset.cpp.s:
-	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_multimap_multiset.cpp.s
-.PHONY : test_STLContainer_multimap_multiset.cpp.s
+test_STLContainer_multiset.cpp.s:
+	cd /home/zhoufeiwei/Desktop/STLofZFW/build && $(MAKE) -f test/CMakeFiles/test_sequence_containers.dir/build.make test/CMakeFiles/test_sequence_containers.dir/test_STLContainer_multiset.cpp.s
+.PHONY : test_STLContainer_multiset.cpp.s
 
 # Help Target
 help:
@@ -161,9 +161,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... test_sequence_containers"
-	@echo "... test_STLContainer_multimap_multiset.o"
-	@echo "... test_STLContainer_multimap_multiset.i"
-	@echo "... test_STLContainer_multimap_multiset.s"
+	@echo "... test_STLContainer_multiset.o"
+	@echo "... test_STLContainer_multiset.i"
+	@echo "... test_STLContainer_multiset.s"
 .PHONY : help
 
 
