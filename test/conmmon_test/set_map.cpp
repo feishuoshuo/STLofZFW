@@ -31,21 +31,22 @@ int main()
   simap["e23"] = 3;
   simap["a34"] = 4;
   simap["e23"] = 10;
+  std::cout << "a34 " << simap["a34"] << std::endl;
   // std::pair<int, int> value(10, 5);
   // simap.insert(value);
-  zfwstl::map<std::string, int> simap2 = simap;
-  auto res = simap.insert(zfwstl::make_pair(std::string("zhoufeiwei"), 100)); // 在指定位置插入单个元素
-  auto i = (*(res.first)).first;
+  // zfwstl::map<std::string, int> simap2 = simap;
+  // auto res = simap.insert(zfwstl::make_pair(std::string("zhoufeiwei"), 100)); // 在指定位置插入单个元素
+  // auto i = (*(res.first)).first;
 
-  zfwstl::map<std::string, int>::const_iterator ite1 = simap.begin();
-  zfwstl::map<std::string, int>::const_iterator ite2 = simap.end();
-  for (; ite1 != ite2; ++ite1)
-  {
-    std::cout << (*ite1).first << "=" << (*ite1).second << " ";
-  }
-  std::cout << std::endl;
-  zfwstl::map<std::string, int> simap3 = simap;
-  std::cout << (simap3 == simap) << std::endl;
+  // zfwstl::map<std::string, int>::const_iterator ite1 = simap.begin();
+  // zfwstl::map<std::string, int>::const_iterator ite2 = simap.end();
+  // for (; ite1 != ite2; ++ite1)
+  // {
+  //   std::cout << (*ite1).first << "=" << (*ite1).second << " ";
+  // }
+  // std::cout << std::endl;
+  // zfwstl::map<std::string, int> simap3 = simap;
+  // std::cout << (simap3 == simap) << std::endl;
   // zfwstl::map<string, int>::iterator simap_iter = simap.begin();
   // for (; simap_iter != simap.end(); ++simap_iter)
   //   cout << simap_iter->first << ' '

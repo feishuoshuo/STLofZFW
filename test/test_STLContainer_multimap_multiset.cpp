@@ -4,10 +4,11 @@
 #include <iostream>
 #include <cstddef> // for size_t, ptrdiff_t
 #include <string>
-#include "../STL_2/map.h"
+#include "../STL_2/multimap.h"
+#include "../STL_2/multiset.h"
 #include "../src/util.h" // for make_pair
 /**
- * AContainerTestMap: 关联容器测试类
+ * AContainerTestMMap: 关联容器测试类
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
  * -----------------------------------------------------
  * InitialState：测试向量在初始化后的状态。
@@ -17,7 +18,7 @@
 void print_start()
 {
   std::cout << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : map -----------------]\n";
+  std::cout << "[----------------- Run container test : multi_map & multi_set -----------------]\n";
   std::cout << "[-------------------------- API test ---------------------------]\n";
 }
 void print_process(string tmp)
@@ -25,15 +26,15 @@ void print_process(string tmp)
   std::cout << "[---- " << tmp << " ----]\n";
 }
 // 测试类
-class AContainerTestMap : public ::testing::Test
+class AContainerTestMMap : public ::testing::Test
 {
 protected:
-  zfwstl::map<std::string, int> simap;
+  zfwstl::multimap<std::string, int> simap;
   void priMap()
   {
     print_process("map:");
-    zfwstl::map<std::string, int>::iterator ite1 = simap.begin();
-    zfwstl::map<std::string, int>::iterator ite2 = simap.end();
+    zfwstl::multimap<std::string, int>::iterator ite1 = simap.begin();
+    zfwstl::multimap<std::string, int>::iterator ite2 = simap.end();
 
     for (; ite1 != ite2; ++ite1)
       std::cout << (*ite1).first << "=" << (*ite1).second << " ";
@@ -50,11 +51,11 @@ protected:
 };
 //===============测试用例开始===============
 // 测试构造函数
-TEST_F(AContainerTestMap, Constructor)
+TEST_F(AContainerTestMMap, Constructor)
 {
 
   print_process("Default constructor");
-  zfwstl::map<int, std::string> v3; // 默认构造
+  zfwstl::multimap<int, std::string> v3; // 默认构造
   EXPECT_TRUE(v3.empty());
 
   print_process("Fill constructor");
@@ -71,65 +72,66 @@ TEST_F(AContainerTestMap, Constructor)
   }
 
   print_process("Copy constructor");
-  zfwstl::map<int, std::string> v5(v3); // 拷贝构造
+  zfwstl::multimap<int, std::string> v5(v3); // 拷贝构造
   EXPECT_EQ(v5, v3);
   EXPECT_FALSE(v3.empty());
 
   print_process("Move constructor");
-  zfwstl::map<int, std::string> v6(std::move(v3)); // 移动构造
+  zfwstl::multimap<int, std::string> v6(zfwstl::move(v3)); // 移动构造
   EXPECT_NE(v6, v3);
   EXPECT_TRUE(v3.empty());
 
   print_process("range constructor");
   auto it1 = simap.begin();
   auto it2 = simap.end();
-  zfwstl::map<std::string, int> v7(it1, it2); // 范围构造函数
+  zfwstl::multimap<std::string, int> v7(it1, it2); // 范围构造函数
   EXPECT_EQ(v7, simap);
 
   print_process("initializer_list constructor"); // 列表初始化构造
-  zfwstl::map<int, std::string> myMap({{1, "one"}, {2, "two"}, {3, "three"}});
-  EXPECT_EQ(myMap[1], "one");
-  EXPECT_EQ(myMap[2], "two");
-  EXPECT_EQ(myMap[3], "three");
+  zfwstl::multimap<int, std::string> myMap({{1, "one"}, {2, "two"}, {3, "three"}});
+
+  EXPECT_EQ((*(myMap.find(1))).second, "one");
+  EXPECT_EQ((*(myMap.find(2))).second, "two");
+  EXPECT_EQ((*(myMap.find(3))).second, "three");
 }
 // 测试operator=复制赋值操作符
-TEST_F(AContainerTestMap, AssignmentOperator)
+TEST_F(AContainerTestMMap, AssignmentOperator)
 {
   print_process("Assignment operator");
-  zfwstl::map<std::string, int> v3 = simap; // 赋值操作运算符
+  zfwstl::multimap<std::string, int> v3 = simap; // 赋值操作运算符
   EXPECT_EQ(v3, simap);
 
   print_process("initializer_list Assignment operator");
-  zfwstl::map<std::string, int> v4 = zfwstl::map<std::string, int>({{"four", 4},
-                                                                    {"five", 5},
-                                                                    {"six", 6}});
+  zfwstl::multimap<std::string, int> v4 = zfwstl::multimap<std::string, int>({{"four", 4},
+                                                                              {"five", 5},
+                                                                              {"six", 6}});
   EXPECT_EQ(v4.size(), 3);
-  EXPECT_EQ(v4["four"], 4);
-  EXPECT_EQ(v4["five"], 5);
-  EXPECT_EQ(v4["six"], 6);
+  EXPECT_EQ((*(v4.find("four"))).second, 4);
+  EXPECT_EQ((*(v4.find("five"))).second, 5);
+  EXPECT_EQ((*(v4.find("six"))).second, 6);
 
   // 移动赋值操作运算符
   print_process("Move Assignment operator");
-  zfwstl::map<std::string, int> v5 = zfwstl::move(simap);
+  zfwstl::multimap<std::string, int> v5 = zfwstl::move(simap);
   EXPECT_TRUE(simap.empty());
-  EXPECT_EQ(v5["one"], 1);
-  EXPECT_EQ(v5["two"], 2);
-  EXPECT_EQ(v5["three"], 3);
+  EXPECT_EQ((*(v5.find("one"))).second, 1);
+  EXPECT_EQ((*(v5.find("two"))).second, 2);
+  EXPECT_EQ((*(v5.find("three"))).second, 3);
 }
 // 测试 insert, erase 方法
-TEST_F(AContainerTestMap, InsertErase)
+TEST_F(AContainerTestMMap, InsertErase)
 {
   print_process("Inserts a single element at the specified position");
   auto res = simap.insert(zfwstl::make_pair(std::string("zhoufeiwei"), 100)); // 在指定位置插入单个元素
-  auto i = (*(res.first)).second;
+  auto i = (*(res)).second;
   EXPECT_EQ(i, 100);
   EXPECT_EQ(simap.size(), 4);
 
   print_process("Inserts more than one of the same elements at the specified location");
-  zfwstl::map<std::string, int> v3({{"liuliuilu", 6}, {"egiht", 888}});
+  zfwstl::multimap<std::string, int> v3({{"liuliuilu", 6}, {"egiht", 888}});
   simap.insert(v3.begin(), v3.end()); // 在指定位置插入多个相同元素
-  EXPECT_EQ(simap["liuliuilu"], 6);
-  EXPECT_EQ(simap["egiht"], 888);
+  EXPECT_EQ((*(simap.find("liuliuilu"))).second, 6);
+  EXPECT_EQ((*(simap.find("egiht"))).second, 888);
   EXPECT_EQ(simap.size(), 6);
 
   print_process("Erase a single element");
@@ -146,47 +148,90 @@ TEST_F(AContainerTestMap, InsertErase)
   priMap();
 }
 // 测试 clear 方法
-TEST_F(AContainerTestMap, Clear)
+TEST_F(AContainerTestMMap, Clear)
 {
   print_process("clear & empty");
   simap.clear();
   EXPECT_TRUE(simap.empty());
 }
 // 测试 swap 方法
-TEST_F(AContainerTestMap, Swap)
+TEST_F(AContainerTestMMap, Swap)
 {
   print_process("Swap");
-  zfwstl::map<std::string, int> v3({{"liuliuilu", 6}});
+  zfwstl::multimap<std::string, int> v3({{"liuliuilu", 6}});
   simap.swap(v3);
   EXPECT_EQ(simap.size(), 1);
   EXPECT_EQ(v3.size(), 3);
-  EXPECT_EQ(simap["liuliuilu"], 6);
-  EXPECT_EQ(v3["one"], 1);
+  EXPECT_NE((*(v3.find("liuliuilu"))).second, 6); // multimap键值可重复
+  EXPECT_EQ((*(v3.find("one"))).second, 1);
 }
-// // 测试一系列反向迭代器rbegin, rend()
-// TEST_F(AContainerTestMap, BeginEndIterators)
-// {
-//   print_process("rbegin/end & rcbegin/end");
-//   auto it = simap.begin();
-//   EXPECT_EQ(*it, 6); // 检查 begin() 是否指向第一个元素
-//   auto end_it = simap.end();
-//   EXPECT_EQ(*(--end_it), 10); // 检查 end() 前一个元素是否是最后一个元素
+TEST_F(AContainerTestMMap, LowerUpperBound)
+{
+  priMap();
+  auto ite1 = simap.find(string("one"));
+  EXPECT_TRUE(ite1 != simap.end());
 
-//   auto rbegin_it = simap.rbegin();
-//   EXPECT_EQ(*rbegin_it, 10); // 检查 rbegin() 是否指向最后一个元素
-//   auto rend_it = simap.rend();
-//   EXPECT_EQ(*(--rend_it), 6); // 检查 rend() 前一个元素是否是第一个元素
+  print_process("lower_bound");
+  auto it = simap.lower_bound("one");
+  EXPECT_TRUE(it != simap.end());
+  EXPECT_EQ((*(it)).first, "one");
 
-//   auto cbegin_it = simap.cbegin();
-//   EXPECT_EQ(*cbegin_it, 6); // 检查 cbegin() 是否指向第一个元素
-//   auto cend_it = simap.cend();
-//   EXPECT_EQ(*(--cend_it), 10); // 检查 cend() 前一个元素是否是最后一个元素
+  it = simap.lower_bound("two");
+  EXPECT_TRUE(it != simap.end());
+  EXPECT_EQ((*(it)).first, "two");
 
-//   auto crbegin_it = simap.crbegin();
-//   EXPECT_EQ(*crbegin_it, 10); // 检查 crbegin() 是否指向第一个元素
-//   auto crend_it = simap.crend();
-//   EXPECT_EQ(*(--crend_it), 6); // 检查 crend() 前一个元素是否是最后一个元素
-// }
+  it = simap.lower_bound("three");
+  EXPECT_TRUE(it != simap.end());
+  EXPECT_EQ((*(it)).first, "three");
+
+  print_process("upper_bound");
+  it = simap.upper_bound("one");
+  EXPECT_EQ((*(it)).second, 3);
+
+  it = simap.upper_bound("two");
+  EXPECT_TRUE(it == simap.end());
+
+  it = simap.upper_bound("three");
+  EXPECT_TRUE(it != simap.end());
+  EXPECT_EQ((*(it)).second, 2);
+
+  print_process("equal_range");
+  simap.insert(zfwstl::make_pair(std::string("four"), 4));
+  simap.insert(zfwstl::make_pair(std::string("five"), 5));
+  simap.insert(zfwstl::make_pair(std::string("five"), 5));
+  simap.insert(zfwstl::make_pair(std::string("six"), 6));
+  // 测试存在的键
+  auto range = simap.equal_range("five");
+  EXPECT_EQ(simap.count("five"), 2);
+
+  // 测试不存在的键
+  range = simap.equal_range("zhoufeiwei");
+  EXPECT_EQ(simap.count("zhoufeiwei"), 0);
+}
+// 测试一系列反向迭代器rbegin, rend()
+TEST_F(AContainerTestMMap, BeginEndIterators)
+{
+  print_process("rbegin/end & rcbegin/end");
+  auto it = simap.begin();
+  EXPECT_EQ((*(it)).first, "one"); // 检查 begin() 是否指向第一个元素
+  auto end_it = simap.end();
+  EXPECT_EQ((*(--end_it)).first, "two"); // 检查 end() 前一个元素是否是最后一个元素
+
+  auto rbegin_it = simap.rbegin();
+  EXPECT_EQ((*(rbegin_it)).first, "two"); // 检查 rbegin() 是否指向最后一个元素
+  auto rend_it = simap.rend();
+  EXPECT_EQ((*(--rend_it)).first, "one"); // 检查 rend() 前一个元素是否是第一个元素
+
+  auto cbegin_it = simap.cbegin();
+  EXPECT_EQ((*(cbegin_it)).first, "one"); // 检查 cbegin() 是否指向第一个元素
+  auto cend_it = simap.cend();
+  EXPECT_EQ((*(--cend_it)).first, "two"); // 检查 cend() 前一个元素是否是最后一个元素
+
+  auto crbegin_it = simap.crbegin();
+  EXPECT_EQ((*(crbegin_it)).first, "two"); // 检查 crbegin() 是否指向第一个元素
+  auto crend_it = simap.crend();
+  EXPECT_EQ((*(--crend_it)).first, "one"); // 检查 crend() 前一个元素是否是最后一个元素
+}
 int main(int argc, char **argv)
 {
   print_start();

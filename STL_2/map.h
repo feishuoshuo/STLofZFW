@@ -115,6 +115,17 @@ namespace zfwstl
      * *((...))：通过迭代器解引用，获取对应的value_type对象
      */
     T &operator[](const key_type &k) { return (*((insert(value_type(k, T()))).first)).second; }
+    // 上面下面是等价的====================
+    //  mapped_type &operator[](const key_type &key)
+    //  {
+    //    iterator it = lower_bound(key);
+    //    // it->first >= key
+    //    if (it == end() || key_compare()(key, it->first))
+    //    {
+    //      it = (insert(value_type(key, T()))).first;
+    //    }
+    //    return it->second;
+    //  }
     void swap(map &x) { t.swap(x.t); }
     //==================插入删除操作==================
     void clear() { t.clear(); }

@@ -6,7 +6,7 @@
 #include <cstddef>             //for size_t, ptrdiff_t
 #include "../src/functional.h" //for binary_function, less,select1st
 #include "rb_tree.h"
-#include "../src/util.h" //for  pair<iterator, bool>
+#include "../src/util.h" //for  pair<iterator, bool>,move()
 namespace zfwstl
 {
 
@@ -17,7 +17,7 @@ namespace zfwstl
     typedef Key key_type;
     typedef T data_type;
     typedef T mapped_type;
-    typedef std::pair<const Key, T> value_type; // value是可以之后修改的，但是key！！不行
+    typedef zfwstl::pair<const Key, T> value_type; // value是可以之后修改的，但是key！！不行
     typedef Compare key_compare;
     // TAG: 嵌套类，以下定义一个functor比较函数对象，其作用就是调用 "元素比较函数"
     class value_compare : public binary_function<value_type, value_type, bool>
@@ -51,22 +51,42 @@ namespace zfwstl
     typedef typename rep_type::const_reference const_reference;
     typedef typename rep_type::iterator iterator; // 注意与set区别，因为map的value值不参与红黑树节点排布，因此可改变
     typedef typename rep_type::const_iterator const_iterator;
-    // TODO：反转迭代器之后补上
+    typedef typename rep_type::reverse_iterator reverse_iterator;
+    typedef typename rep_type::const_reverse_iterator const_reverse_iterator;
     typedef typename rep_type::size_type size_type;
     typedef typename rep_type::difference_type difference_type;
 
     multimap() : t(Compare()) {}
     explicit multimap(const Compare &comp) : t(comp) {}
+    multimap(std::initializer_list<value_type> ilist)
+        : t()
+    {
+      t.insert_equal(ilist.begin(), ilist.end());
+    }
+
     // multimap允许相同键值存在->insert_equal
     template <class InputIter>
     multimap(InputIter first, InputIter last) : t(Compare()) { t.insert_equal(first, last); }
     template <class InputIter>
     multimap(InputIter first, InputIter last, const Compare &comp) : t(comp) { t.insert_equal(first, last); }
-    multimap(const multimap<Key, Compare /* ,Alloc */> &x) : t(x.t) {}
+    multimap(const multimap &x) : t(x.t) {}
+    multimap(multimap &&x) : t(zfwstl::move(x.t)) {}
 
-    multimap<Key, Compare /* ,Alloc */> &operator=(const multimap<Key, Compare /* ,Alloc */> &x)
+    multimap &operator=(const multimap &x)
     {
       t = x.t;
+      return *this;
+    }
+    multimap &operator=(multimap &&rhs)
+    {
+      t = zfwstl::move(rhs.t);
+      return *this;
+    }
+
+    multimap &operator=(std::initializer_list<value_type> ilist)
+    {
+      t.clear();
+      t.insert_equal(ilist.begin(), ilist.end());
       return *this;
     }
 
@@ -77,21 +97,32 @@ namespace zfwstl
     const_iterator begin() const { return t.begin(); }
     iterator end() { return t.end(); }
     const_iterator end() const { return t.end(); }
-    iterator rend() { return t.rend(); }
-    iterator rbegin() { return t.rbegin(); }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+    const_iterator cbegin() const noexcept { return begin(); }
+    const_iterator cend() const noexcept { return end(); }
+    const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    const_reverse_iterator crend() const noexcept { return rend(); }
     bool empty() { return t.empty(); }
     size_type size() const noexcept { return t.size(); }
     size_type max_size() const noexcept { return t.max_size(); }
     T &operator[](const key_type &k) { return (*((insert(value_type(k, T()))))).second; }
-    void swap(multimap<Key, Compare> &x) { t.swap(x.t); }
+    void swap(multimap &x) { t.swap(x.t); }
     //==================插入删除操作==================
     void clear() { t.clear(); }
 
-    typedef std::pair<iterator, bool> pair_iterator_bool;
+    typedef zfwstl::pair<iterator, bool> pair_iterator_bool;
 
     iterator insert(const value_type &x)
     {
       auto p = t.insert_equal(x);
+      return p;
+    }
+    iterator insert(value_type &&x)
+    {
+      auto p = t.insert_equal(zfwstl::move(x));
       return p;
     }
     // iterator insert(iterator position, const value_type &x)
@@ -117,14 +148,14 @@ namespace zfwstl
 
     iterator find(const key_type &x) { return t.find(x); }
     const_iterator find(const key_type &x) const { return t.find(x); }
-    size_type count(const key_type &x) const { return t.count(x); }
+    size_type count(const key_type &x) const { return t.count_multi(x); }
     iterator lower_bound(const key_type &x) { return t.lower_bound(x); }
     iterator upper_bound(const key_type &x) { return t.upper_bound(x); }
     const_iterator lower_bound(const key_type &x) const { return t.lower_bound(x); }
     const_iterator upper_bound(const key_type &x) const { return t.upper_bound(x); }
-    std::pair<iterator, iterator>
+    zfwstl::pair<iterator, iterator>
     equal_range(const key_type &x) { return t.equal_range(x); }
-    std::pair<const_iterator, const_iterator>
+    zfwstl::pair<const_iterator, const_iterator>
     equal_range(const key_type &x) const { return t.equal_range(x); }
 
   public:
@@ -133,37 +164,36 @@ namespace zfwstl
   };
 
   // 重载比较操作符
-  template <class Key, class Compare>
-  bool operator==(const multimap<Key, Compare> &lhs, const multimap<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator==(const multimap<Key, T, Compare> &lhs, const multimap<Key, T, Compare> &rhs)
   {
     return lhs.t == rhs.t;
   }
-  template <class Key, class Compare>
-  bool operator<(const multimap<Key, Compare> &lhs, const multimap<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator<(const multimap<Key, T, Compare> &lhs, const multimap<Key, T, Compare> &rhs)
   {
     return lhs.t < rhs.t;
   }
-  template <class Key, class Compare>
-  bool operator!=(const multimap<Key, Compare> &lhs, const multimap<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator!=(const multimap<Key, T, Compare> &lhs, const multimap<Key, T, Compare> &rhs)
   {
-    return !(lhs.t == rhs.t);
+    return !(lhs == rhs);
   }
-  template <class Key, class Compare>
-  bool operator>(const multimap<Key, Compare> &lhs, const multimap<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator>(const multimap<Key, T, Compare> &lhs, const multimap<Key, T, Compare> &rhs)
   {
-    return rhs.t < lhs.t;
+    return rhs < lhs;
   }
-  template <class Key, class Compare>
-  bool operator<=(const multimap<Key, Compare> &lhs, const multimap<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator<=(const multimap<Key, T, Compare> &lhs, const multimap<Key, T, Compare> &rhs)
   {
-    return !(rhs.t < lhs.t);
+    return !(rhs < lhs);
   }
-  template <class Key, class Compare>
-  bool operator>=(const multimap<Key, Compare> &lhs, const multimap<Key, Compare> &rhs)
+  template <class Key, class T, class Compare>
+  bool operator>=(const multimap<Key, T, Compare> &lhs, const multimap<Key, T, Compare> &rhs)
   {
-    return !(lhs.t < rhs.t);
+    return !(lhs < rhs);
   }
-
 }
 
 #endif // !ZFWSTL_MULTIMAP_H_
