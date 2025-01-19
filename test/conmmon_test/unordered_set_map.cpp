@@ -1,9 +1,21 @@
-#include "../STL_2/unordered_map.h"
-#include "../STL_2/unordered_set.h"
-#include "../src/functional.h" //for hash
+#include "../../STL_2/unordered_map.h"
+#include "../../STL_2/unordered_set.h"
+#include "../../src/functional.h" //for hash
 #include <iostream>
 #include <string>
-
+class StringHashFcn
+{
+public:
+  size_t operator()(const std::string &str) const
+  {
+    size_t hash = 0;
+    for (char c : str)
+    {
+      hash = hash * 31 + c; // 使用简单的多项式哈希函数
+    }
+    return hash;
+  }
+};
 // 仿函数
 struct eqstr
 {
@@ -77,28 +89,43 @@ void lookup(const zfwstl::unordered_set<const char *, zfwstl::hash<const char *>
 
 int main()
 {
-  zfwstl::unordered_map<const char *, int, hash<const char *>, eqstr> days;
-  // const char *key = "january";
-  days["january"] = 31;
-  days["february"] = 28;
-  days["march"] = 31;
-  days["april"] = 30;
-  days["may"] = 31;
-  days["june"] = 30;
-  days["july"] = 31;
-  days["august"] = 31;
-  days["september"] = 30;
-  days["october"] = 31;
-  days["november"] = 30;
-  days["december"] = 31;
+  zfwstl::unordered_map<const char *, int> v5({{"four", 4},
+                                               {"four", 4},
+                                               {"five", 5},
+                                               {"six", 6}});
 
-  cout << "september -> " << days["september"] << endl;
-  cout << "june -> " << days["june"] << endl;
-  cout << "february -> " << days["february"] << endl;
-  cout << "december -> " << days["december"] << endl;
+  auto it = v5.begin();
+  std::cout << (*it).first << std::endl;
+  ++ ++it;
+  v5.erase(it); // 删除单个元素
+  // zfwstl::unordered_map<const char *, int> days;
+  // // const char *key = "january";
+  // days["january"] = 31;
+  // days["february"] = 28;
+  // days["march"] = 31;
+  // days["april"] = 30;
+  // days["may"] = 31;
+  // days["june"] = 30;
+  // days["july"] = 31;
+  // days["august"] = 31;
+  // days["september"] = 30;
+  // days["october"] = 31;
+  // days["november"] = 30;
+  // days["december"] = 31;
 
-  auto ite1 = days.begin();
-  auto ite2 = days.end();
+  // cout << "september -> " << days["september"] << endl;
+  // cout << "june -> " << days["june"] << endl;
+  // cout << "february -> " << days["february"] << endl;
+  // cout << "december -> " << days["december"] << endl;
+  // days.insert(zfwstl::make_pair("ookkk", 900));
+  // cout << "ookkk -> " << days["ookkk"] << endl;
+
+  // auto it1 = days.begin();
+  // auto it2 = days.end();
+  // zfwstl::unordered_map<const char *, int> v7(it1, it2);
+  // std::cout << (v7 == days) << std::endl;
+  auto ite1 = v5.begin();
+  auto ite2 = v5.end();
   for (; ite1 != ite2; ++ite1)
     cout << ite1->first << " ";
 }

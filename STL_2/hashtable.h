@@ -166,8 +166,15 @@ namespace zfwstl
     typedef __hashtable_iterator<value_type, key_type, hasher, ExtractKey, key_equal> iterator;
     typedef __hashtable_const_iterator<value_type, key_type, hasher, ExtractKey, key_equal> const_iterator;
 
+  public:
+    // 提供一个公共的访问器函数
+    ExtractKey get_key_function() const
+    {
+      return get_key;
+    }
+
   private:
-    // TODO：stl_hash_fun.h  以下三者均为函数对象，stl_hash_fun.h定义有数个标准型别的hasher
+    // TAG：stl_hash_fun.h  以下三者均为函数对象，stl_hash_fun.h定义有数个标准型别的hasher
     hasher hash;
     key_equal equals;
     ExtractKey get_key;
@@ -176,7 +183,7 @@ namespace zfwstl
     typedef zfwstl::simple_allocator<node /*,Alloc */> node_allocator;
     typedef zfwstl::simple_allocator<node /*,Alloc */> allocator_type;
 
-    zfwstl::vector<node * /*,Alloc */> buckets;
+    zfwstl::vector<node *> buckets;
     size_type num_elements; // 元素个数
 
   public:
@@ -185,6 +192,39 @@ namespace zfwstl
       initialize_buckets(n);
     }
     ~hashtable() { clear(); }
+
+    template <class Iter, typename std::enable_if<zfwstl::is_input_iterator<Iter>::value, int>::type = 0>
+    hashtable(Iter first, Iter last, size_type bucket_count,
+              const hasher &hash_ = zfwstl::hash<Value>(), const key_equal &equal = zfwstl::equal_to<Value>()) : num_elements(zfwstl::distance(first, last)), hash(hash_), equals(equal)
+    {
+      initialize_buckets(zfwstl::max(bucket_count, static_cast<size_type>(zfwstl::distance(first, last))));
+    }
+    hashtable(const hashtable &rhs) : hash(rhs.hash), equals(rhs.equals) { copy_from(rhs); }
+    hashtable(hashtable &&rhs) noexcept
+        : num_elements(rhs.num_elements),
+          get_key(rhs.get_key),
+          hash(rhs.hash),
+          equals(rhs.equals)
+    {
+      buckets = zfwstl::move(rhs.buckets);
+      rhs.num_elements = 0;
+    }
+
+    hashtable &operator=(const hashtable &rhs)
+    {
+      if (this != &rhs)
+      {
+        hashtable tmp(rhs);
+        swap(tmp);
+      }
+      return *this;
+    }
+    hashtable &operator=(hashtable &&rhs) noexcept
+    {
+      hashtable tmp(zfwstl::move(rhs));
+      swap(tmp);
+      return *this;
+    }
 
     // 获取桶访问
     zfwstl::vector<node *> &get_buckets() { return buckets; }
@@ -214,19 +254,9 @@ namespace zfwstl
     {
       return iterator(nullptr, this);
     }
-    const_iterator end() const
-    {
-      return const_iterator(nullptr, const_cast<hashtable *>(this));
-    }
-
-    // const_iterator cbegin() const noexcept
-    // {
-    //   return begin();
-    // }
-    // const_iterator cend() const noexcept
-    // {
-    //   return end();
-    // }
+    const_iterator end() const { return const_iterator(nullptr, const_cast<hashtable *>(this)); }
+    const_iterator cbegin() const noexcept { return begin(); }
+    const_iterator cend() const noexcept { return end(); }
 
     // 容量相关操作
     bool empty() const noexcept { return num_elements == 0; }
@@ -328,8 +358,35 @@ namespace zfwstl
       }
       return zfwstl::make_pair(end(), end());
     }
+    zfwstl::pair<const_iterator, const_iterator> equal_range_multi(const key_type &key) const
+    {
+      const auto n = hashf(key);
+      for (node *first = buckets[n]; first; first = first->next)
+      {
+        if (equals(get_key(first->val), key))
+        { // 如果出现相等的键值
+          for (node *second = first->next; second; second = second->next)
+          {
+            if (!equals(get_key(second->val), key))
+              return zfwstl::make_pair(const_iterator(first, this), const_iterator(second, this));
+          }
+          for (auto m = n + 1; m < buckets.size(); ++m)
+          { // 整个链表都相等，查找下一个链表出现的位置
+            if (buckets[m])
+              return zfwstl::make_pair(const_iterator(first, this), const_iterator(buckets[m], this));
+          }
+          return zfwstl::make_pair(const_iterator(first, this), end());
+        }
+      }
+      return zfwstl::make_pair(end(), end());
+    }
 
   public:
+    // 打印桶中各个元素的位置
+    size_type bucket_index_of(const Key &key) const
+    {
+      return hash(key) % buckets.size();
+    }
     // insert, resize表格重整
     zfwstl::pair<iterator, bool> insert_unique(const value_type &obj)
     {
@@ -346,6 +403,12 @@ namespace zfwstl
       resize(num_elements + 1); // 判断是否需要重建表格，如需则扩充
       return insert_equal_noresize(obj);
     }
+    template <class InputIter>
+    void insert_equal(InputIter first, InputIter last)
+    {
+      copy_insert_multi(first, last, iterator_category(first));
+    }
+
     reference find_or_insert(const value_type &obj)
     {
       resize(num_elements + 1);
@@ -364,17 +427,17 @@ namespace zfwstl
       return tmp->val;
     }
 
-    void erase(const_iterator position)
+    void erase(iterator position)
     {
-      auto p = position.node;
+      auto p = position.cur;
       if (p)
       {
-        const auto n = hash(get_key(p->val));
+        const auto n = hashf(get_key(p->val));
         auto cur = buckets[n];
         if (cur == p)
         { // p 位于链表头部
           buckets[n] = cur->next;
-          destroy_node(cur);
+          delete_node(cur);
           --num_elements;
         }
         else
@@ -385,7 +448,7 @@ namespace zfwstl
             if (next == p)
             {
               cur->next = next->next;
-              destroy_node(next);
+              delete_node(next);
               --num_elements;
               break;
             }
@@ -398,23 +461,23 @@ namespace zfwstl
         }
       }
     }
-    void erase(const_iterator first, const_iterator last)
+    void erase(iterator first, iterator last)
     {
-      if (first.node == last.node)
+      if (first.cur == last.cur)
         return;
-      auto first_bucket = first.node
-                              ? hash(get_key(first.node->val))
+      auto first_bucket = first.cur
+                              ? hashf(get_key(first.cur->val))
                               : buckets.size();
-      auto last_bucket = last.node
-                             ? hash(get_key(last.node->val))
+      auto last_bucket = last.cur
+                             ? hashf(get_key(last.cur->val))
                              : buckets.size();
       if (first_bucket == last_bucket)
       { // 如果在 bucket 在同一个位置
-        erase_bucket(first_bucket, first.node, last.node);
+        erase_bucket(first_bucket, const_cast<node *>(first.cur), const_cast<node *>(last.cur));
       }
       else
       {
-        erase_bucket(first_bucket, first.node, nullptr);
+        erase_bucket(first_bucket, const_cast<node *>(first.cur), nullptr);
         for (auto n = first_bucket + 1; n < last_bucket; ++n)
         {
           if (buckets[n] != nullptr)
@@ -422,7 +485,7 @@ namespace zfwstl
         }
         if (last_bucket != buckets.size())
         {
-          erase_bucket(last_bucket, last.node);
+          erase_bucket(last_bucket, const_cast<node *>(last.cur));
         }
       }
     }
@@ -443,19 +506,33 @@ namespace zfwstl
         while (next != last)
         {
           cur->next = next->next;
-          destroy_node(next);
+          delete_node(next);
           next = cur->next;
           --num_elements;
         }
       }
     }
+    // 在第 n 个 bucket 内，删除 [buckets_[n], last) 的节点
+    void erase_bucket(size_type n, node *last)
+    {
+      auto cur = buckets[n];
+      while (cur != last)
+      {
+        auto next = cur->next;
+        delete_node(cur);
+        cur = next;
+        --num_elements;
+      }
+      buckets[n] = last;
+    }
     size_type erase_multi(const key_type &key)
     {
       auto p = equal_range_multi(key);
-      if (p.first.node)
+      if (p.first.cur)
       {
+        size_type tmp = zfwstl::distance(p.first, p.second);
         erase(p.first, p.second);
-        return zfwstl::distance(p.first, p.second);
+        return tmp;
       }
       return 0;
     }
@@ -468,7 +545,7 @@ namespace zfwstl
         if (equals(get_key(first->val), key))
         {
           buckets[n] = first->next;
-          destroy_node(first);
+          delete_node(first);
           --num_elements;
           return 1;
         }
@@ -480,7 +557,7 @@ namespace zfwstl
             if (equals(get_key(next->val), key))
             {
               first->next = next->next;
-              destroy_node(next);
+              delete_node(next);
               --num_elements;
               return 1;
             }
@@ -490,6 +567,18 @@ namespace zfwstl
         }
       }
       return 0;
+    }
+
+    void swap(hashtable &rhs) noexcept
+    {
+      if (this != &rhs)
+      {
+        buckets.swap(rhs.buckets);
+        zfwstl::swap(num_elements, rhs.num_elements);
+        zfwstl::swap(hash, rhs.hash);
+        zfwstl::swap(equals, rhs.equals);
+        zfwstl::swap(get_key, rhs.get_key);
+      }
     }
 
     // copy_from, clear
@@ -670,7 +759,6 @@ namespace zfwstl
       for (; first != last; ++first)
         insert_unique_noresize(*first);
     }
-
     template <class ForwardIter>
     void copy_insert_unique(ForwardIter first, ForwardIter last, zfwstl::forward_iterator_tag)
     {
@@ -678,6 +766,21 @@ namespace zfwstl
       resize(num_elements + n); // 判断是否需要重建表格，如需则扩充
       for (; n > 0; --n, ++first)
         insert_unique_noresize(*first);
+    }
+    template <class InputIter>
+    void copy_insert_multi(InputIter first, InputIter last, zfwstl::input_iterator_tag)
+    {
+      resize(zfwstl::distance(first, last));
+      for (; first != last; ++first)
+        insert_equal_noresize(*first);
+    }
+    template <class ForwardIter>
+    void copy_insert_multi(ForwardIter first, ForwardIter last, zfwstl::forward_iterator_tag)
+    {
+      size_type n = zfwstl::distance(first, last);
+      resize(n);
+      for (; n > 0; --n, ++first)
+        insert_equal_noresize(*first);
     }
 
   public:

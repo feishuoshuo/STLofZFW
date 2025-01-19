@@ -26,7 +26,6 @@ namespace zfwstl
     typedef typename ht::const_reference const_reference;
     typedef typename ht::const_iterator iterator; //!!底层迭代器const_iterator
     typedef typename ht::const_iterator const_iterator;
-    // TODO：反转迭代器之后补上
     typedef typename ht::size_type size_type;
     typedef typename ht::difference_type difference_type;
 
