@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)# 需求的最低的cmake程序版本
 project(STLofZFW)# 本工程的名字
 set(CMAKE_CXX_STANDARD 14)# GoogleTest requires at least C++14
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)#指定一个bin文件夹下放置所有可执行文件
 add_subdirectory(test)# 添加测试目录
 
 
