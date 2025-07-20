@@ -1,11 +1,11 @@
 #ifndef GOOGLETEST_SAMPLES_map_H_
 #define GOOGLETEST_SAMPLES_map_H_
-#include <gtest/gtest.h>
-#include <iostream>
-#include <cstddef> // for size_t, ptrdiff_t
-#include <string>
 #include "../STL_2/multiset.h"
 #include "../src/util.h" // for make_pair
+#include <cstddef>       // for size_t, ptrdiff_t
+#include <gtest/gtest.h>
+#include <iostream>
+#include <string>
 /**
  * AContainerTestMSet: 关联容器测试类
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
@@ -14,19 +14,19 @@
  * PushBack：测试 push_back 方法是否正确增加了元素并更新了大小。
  * Insert：测试 insert 方法是否正确插入了元素，并检查了插入位置及其后元素的状态
  */
-void print_start()
-{
-  std::cout << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : multi_set -----------------]\n";
-  std::cout << "[-------------------------- API test ---------------------------]\n";
+void print_start() {
+  std::cout
+      << "[===============================================================]\n";
+  std::cout << "[----------------- Run container test : multi_set "
+               "-----------------]\n";
+  std::cout
+      << "[-------------------------- API test ---------------------------]\n";
 }
-void print_process(string tmp)
-{
+void print_process(std::string tmp) {
   std::cout << "[---- " << tmp << " ----]\n";
 }
 template <class Container>
-void print_element(const Container &con, const std::string &name)
-{
+void print_element(const Container &con, const std::string &name) {
   std::cout << name << " ";
   auto ite1 = con.begin();
   auto ite2 = con.end();
@@ -36,12 +36,10 @@ void print_element(const Container &con, const std::string &name)
   std::cout << std::endl;
 }
 // 测试类
-class AContainerTestMSet : public ::testing::Test
-{
+class AContainerTestMSet : public ::testing::Test {
 protected:
   zfwstl::multiset<int> siset;
-  void priSet()
-  {
+  void priSet() {
     print_process("set:");
     zfwstl::multiset<int>::iterator ite1 = siset.begin();
     zfwstl::multiset<int>::iterator ite2 = siset.end();
@@ -51,8 +49,7 @@ protected:
     std::cout << std::endl;
   }
 
-  void SetUp() override
-  {
+  void SetUp() override {
     // 在每个测试用例执行前插入一些初始数据
     siset.insert(1);
     siset.insert(2);
@@ -61,8 +58,7 @@ protected:
 };
 //===============测试用例开始===============
 // 测试构造函数
-TEST_F(AContainerTestMSet, Constructor)
-{
+TEST_F(AContainerTestMSet, Constructor) {
 
   print_process("Default constructor");
   zfwstl::multiset<int> v3; // 默认构造
@@ -70,7 +66,7 @@ TEST_F(AContainerTestMSet, Constructor)
 
   print_process("Fill constructor");
   // 使用循环来初始化map
-  string arr[] = {"c1", "a2", "v4", "o8", "@10"};
+  std::string arr[] = {"c1", "a2", "v4", "o8", "@10"};
   zfwstl::multiset<std::string> v4{arr, arr + 5};
   EXPECT_EQ(v4.size(), 5);
   print_element(v4, "v4");
@@ -96,8 +92,7 @@ TEST_F(AContainerTestMSet, Constructor)
   EXPECT_EQ(mySet.size(), 3);
 }
 // 测试operator=复制赋值操作符
-TEST_F(AContainerTestMSet, AssignmentOperator)
-{
+TEST_F(AContainerTestMSet, AssignmentOperator) {
   print_process("Assignment operator");
   zfwstl::multiset<int> v3 = siset; // 赋值操作运算符
   EXPECT_EQ(v3, siset);
@@ -113,14 +108,14 @@ TEST_F(AContainerTestMSet, AssignmentOperator)
   EXPECT_NE(v5, siset);
 }
 // 测试 insert, erase 方法
-TEST_F(AContainerTestMSet, InsertErase)
-{
+TEST_F(AContainerTestMSet, InsertErase) {
   print_process("Inserts a single element at the specified position");
   auto res = siset.insert(100); // 在指定位置插入单个元素
   EXPECT_EQ(*(res), 100);
   EXPECT_EQ(siset.size(), 4);
 
-  print_process("Inserts more than one of the same elements at the specified location");
+  print_process(
+      "Inserts more than one of the same elements at the specified location");
   zfwstl::multiset<int> v3({6, 888});
   siset.insert(v3.begin(), v3.end()); // 在指定位置插入多个相同元素
   EXPECT_EQ(siset.size(), 6);
@@ -139,23 +134,20 @@ TEST_F(AContainerTestMSet, InsertErase)
   priSet();
 }
 // 测试 clear 方法
-TEST_F(AContainerTestMSet, Clear)
-{
+TEST_F(AContainerTestMSet, Clear) {
   print_process("clear & empty");
   siset.clear();
   EXPECT_TRUE(siset.empty());
 }
 // 测试 swap 方法
-TEST_F(AContainerTestMSet, Swap)
-{
+TEST_F(AContainerTestMSet, Swap) {
   print_process("Swap");
   zfwstl::multiset<int> v3({21, 54, 265, 987});
   siset.swap(v3);
   EXPECT_EQ(siset.size(), 4);
   EXPECT_EQ(v3.size(), 3);
 }
-TEST_F(AContainerTestMSet, LowerUpperBound)
-{
+TEST_F(AContainerTestMSet, LowerUpperBound) {
   print_process("lower_bound");
 
   auto it = siset.lower_bound(14);
@@ -194,8 +186,7 @@ TEST_F(AContainerTestMSet, LowerUpperBound)
   EXPECT_EQ(siset.count(99), 0);
 }
 // 测试一系列反向迭代器rbegin, rend()
-TEST_F(AContainerTestMSet, BeginEndIterators)
-{
+TEST_F(AContainerTestMSet, BeginEndIterators) {
   print_process("rbegin/end & rcbegin/end");
   auto it = siset.begin();
   EXPECT_EQ(*it, 1); // 检查 begin() 是否指向第一个元素
@@ -217,8 +208,7 @@ TEST_F(AContainerTestMSet, BeginEndIterators)
   auto crend_it = siset.crend();
   EXPECT_EQ(*(--crend_it), 1); // 检查 crend() 前一个元素是否是最后一个元素
 }
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   print_start();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

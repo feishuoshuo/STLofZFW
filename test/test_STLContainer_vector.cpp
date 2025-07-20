@@ -1,10 +1,10 @@
 #ifndef GOOGLETEST_SAMPLES_vector_H_
 #define GOOGLETEST_SAMPLES_vector_H_
+#include "../STL/vector.h"
+#include <cstddef> // for size_t, ptrdiff_t
 #include <gtest/gtest.h>
 #include <iostream>
-#include <cstddef> // for size_t, ptrdiff_t
 #include <string>
-#include "../STL/vector.h"
 /**
  * SContainerTestVec: 序列容器测试类
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
@@ -13,42 +13,38 @@
  * PushBack：测试 push_back 方法是否正确增加了元素并更新了大小。
  * Insert：测试 insert 方法是否正确插入了元素，并检查了插入位置及其后元素的状态
  */
-void print_start()
-{
-  std::cout << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : vector -----------------]\n";
-  std::cout << "[-------------------------- API test ---------------------------]\n";
+void print_start() {
+  std::cout
+      << "[===============================================================]\n";
+  std::cout
+      << "[----------------- Run container test : vector -----------------]\n";
+  std::cout
+      << "[-------------------------- API test ---------------------------]\n";
 }
-void print_process(string tmp)
-{
+void print_process(std::string tmp) {
   std::cout << "[---- " << tmp << " ----]\n";
 }
 template <class Container>
-void print_element(const Container &con, const std::string &name)
-{
+void print_element(const Container &con, const std::string &name) {
   std::cout << name << " contains: ";
-  for (const auto &elem : con)
-  {
+  for (const auto &elem : con) {
     std::cout << elem << " ";
   }
   std::cout << std::endl;
 }
 // 测试类
-class SContainerTestVec : public ::testing::Test
-{
+class SContainerTestVec : public ::testing::Test {
 protected:
   zfwstl::vector<int> v1, v2;
 
-  void SetUp() override
-  {
+  void SetUp() override {
     v1 = {1, 2, 3, 4, 5}; // 初始化向量
     v2 = {6, 7, 8, 9, 10};
   }
 };
 //===============测试用例开始===============
 // 测试构造函数
-TEST_F(SContainerTestVec, Constructor)
-{
+TEST_F(SContainerTestVec, Constructor) {
 
   print_process("Default constructor");
   zfwstl::vector<int> v3; // 默认构造
@@ -57,8 +53,7 @@ TEST_F(SContainerTestVec, Constructor)
   print_process("Fill constructor");
   zfwstl::vector<int> v4(5, 10); // 填充构造
   EXPECT_EQ(v4.size(), 5);
-  for (int i : v4)
-  {
+  for (int i : v4) {
     EXPECT_EQ(i, 10);
   }
 
@@ -79,8 +74,7 @@ TEST_F(SContainerTestVec, Constructor)
   EXPECT_EQ(v7, v2);
 }
 // 测试operator=复制赋值操作符
-TEST_F(SContainerTestVec, AssignmentOperator)
-{
+TEST_F(SContainerTestVec, AssignmentOperator) {
   print_process("Assignment operator");
   zfwstl::vector<int> v3 = v1; // 赋值操作运算符
   EXPECT_EQ(v3, v1);
@@ -99,13 +93,11 @@ TEST_F(SContainerTestVec, AssignmentOperator)
   EXPECT_EQ(v5.back(), 6);
 }
 // 测试 assign 方法
-TEST_F(SContainerTestVec, Assign)
-{
+TEST_F(SContainerTestVec, Assign) {
   print_process("Fill assignment");
   v1.assign(3, 100); // 填充赋值
   EXPECT_EQ(v1.size(), 3);
-  for (int i : v1)
-  {
+  for (int i : v1) {
     EXPECT_EQ(i, 100);
   }
 
@@ -113,8 +105,7 @@ TEST_F(SContainerTestVec, Assign)
   int arr[] = {1, 2, 3, 4, 5};
   v1.assign(arr, arr + 5); // 范围赋值
   EXPECT_EQ(v1.size(), 5);
-  for (size_t i = 0; i < v1.size(); ++i)
-  {
+  for (size_t i = 0; i < v1.size(); ++i) {
     EXPECT_EQ(v1[i], arr[i]);
   }
 
@@ -123,8 +114,7 @@ TEST_F(SContainerTestVec, Assign)
   EXPECT_EQ(v1.size(), 9);
 }
 // 测试 push_back, pop_back, emplace_back, emplace 方法
-TEST_F(SContainerTestVec, EmplacePushPopBack)
-{
+TEST_F(SContainerTestVec, EmplacePushPopBack) {
   print_process("push_back");
   v1.push_back(6);
   EXPECT_EQ(v1.back(), 6);
@@ -147,15 +137,15 @@ TEST_F(SContainerTestVec, EmplacePushPopBack)
   EXPECT_EQ(v1.size(), 7);
 }
 // 测试 insert 方法
-TEST_F(SContainerTestVec, Insert)
-{
+TEST_F(SContainerTestVec, Insert) {
   print_process("Inserts a single element at the specified position");
   auto it = v1.begin() + 2;
   v1.insert(it, 100); // 在指定位置插入单个元素
   EXPECT_EQ(v1[2], 100);
   EXPECT_EQ(v1.size(), 6);
 
-  print_process("Inserts more than one of the same elements at the specified location");
+  print_process(
+      "Inserts more than one of the same elements at the specified location");
   it = v1.begin() + 2;
   v1.insert(it, 2, 200); // 在指定位置插入多个相同元素
   EXPECT_EQ(v1[2], 200);
@@ -163,8 +153,7 @@ TEST_F(SContainerTestVec, Insert)
   EXPECT_EQ(v1.size(), 8);
 }
 // 测试 erase 方法
-TEST_F(SContainerTestVec, Erase)
-{
+TEST_F(SContainerTestVec, Erase) {
   print_process("Erase a single element");
   auto it = v1.begin() + 2;
   v1.erase(it); // 删除单个元素
@@ -178,29 +167,25 @@ TEST_F(SContainerTestVec, Erase)
   EXPECT_EQ(v1[1], 5);
 }
 // 测试 clear 方法
-TEST_F(SContainerTestVec, Clear)
-{
+TEST_F(SContainerTestVec, Clear) {
   print_process("clear & empty");
   v1.clear();
   EXPECT_TRUE(v1.empty());
 }
 // 测试 swap 方法
-TEST_F(SContainerTestVec, Swap)
-{
+TEST_F(SContainerTestVec, Swap) {
   print_process("Swap");
   zfwstl::vector<int> v3 = {11, 12, 13, 14, 15};
   v1.swap(v3);
   EXPECT_EQ(v1.size(), 5);
   EXPECT_EQ(v3.size(), 5);
-  for (size_t i = 0; i < 5; ++i)
-  {
+  for (size_t i = 0; i < 5; ++i) {
     EXPECT_EQ(v1[i], 11 + i);
     EXPECT_EQ(v3[i], 1 + i);
   }
 }
 // 测试 at 方法
-TEST_F(SContainerTestVec, At)
-{
+TEST_F(SContainerTestVec, At) {
   print_process("At");
   EXPECT_EQ(v1.at(0), 1);
   EXPECT_EQ(v1.at(4), 5);
@@ -208,22 +193,19 @@ TEST_F(SContainerTestVec, At)
   // EXPECT_THROW(v1.at(5), std::out_of_range);
 }
 // 测试 front 和 back 方法
-TEST_F(SContainerTestVec, FrontBack)
-{
+TEST_F(SContainerTestVec, FrontBack) {
   print_process("front & back");
   EXPECT_EQ(v1.front(), 1);
   EXPECT_EQ(v1.back(), 5);
 }
 // 测试数据成员 size 和 capacity
-TEST_F(SContainerTestVec, SizeCapacity)
-{
+TEST_F(SContainerTestVec, SizeCapacity) {
   print_process("size & capacity");
   EXPECT_EQ(v1.size(), 5);
   EXPECT_LE(v1.size(), v1.capacity());
 }
 // 测试数据成员 reserve(调整容量), resize(重置容器大小)
-TEST_F(SContainerTestVec, ReserveResize)
-{
+TEST_F(SContainerTestVec, ReserveResize) {
   print_process("reserve & resize");
   EXPECT_EQ(v1.size(), 5);
   v1.reserve(20);
@@ -236,8 +218,7 @@ TEST_F(SContainerTestVec, ReserveResize)
   EXPECT_EQ(v1.size(), 10);
 }
 // 测试一系列反向迭代器rbegin, rend()
-TEST_F(SContainerTestVec, BeginEndIterators)
-{
+TEST_F(SContainerTestVec, BeginEndIterators) {
   print_process("rbegin/end & rcbegin/end");
   auto it = v2.begin();
   EXPECT_EQ(*it, 6); // 检查 begin() 是否指向第一个元素
@@ -259,8 +240,7 @@ TEST_F(SContainerTestVec, BeginEndIterators)
   auto crend_it = v2.crend();
   EXPECT_EQ(*(--crend_it), 6); // 检查 crend() 前一个元素是否是最后一个元素
 }
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   print_start();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -1,11 +1,11 @@
 #ifndef GOOGLETEST_SAMPLES_map_H_
 #define GOOGLETEST_SAMPLES_map_H_
-#include <gtest/gtest.h>
-#include <iostream>
-#include <cstddef> // for size_t, ptrdiff_t
-#include <string>
 #include "../STL_2/unordered_set.h"
 #include "../src/util.h" // for make_pair
+#include <cstddef>       // for size_t, ptrdiff_t
+#include <gtest/gtest.h>
+#include <iostream>
+#include <string>
 /**
  * AContainerTestUSet: 关联容器测试类
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
@@ -14,19 +14,19 @@
  * PushBack：测试 push_back 方法是否正确增加了元素并更新了大小。
  * Insert：测试 insert 方法是否正确插入了元素，并检查了插入位置及其后元素的状态
  */
-void print_start()
-{
-  std::cout << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : unordered_set -----------------]\n";
-  std::cout << "[-------------------------- API test ---------------------------]\n";
+void print_start() {
+  std::cout
+      << "[===============================================================]\n";
+  std::cout << "[----------------- Run container test : unordered_set "
+               "-----------------]\n";
+  std::cout
+      << "[-------------------------- API test ---------------------------]\n";
 }
-void print_process(string tmp)
-{
+void print_process(std::string tmp) {
   std::cout << "[---- " << tmp << " ----]\n";
 }
 template <class Container>
-void print_element(const Container &con, const std::string &name)
-{
+void print_element(const Container &con, const std::string &name) {
   std::cout << name << " ";
   auto ite1 = con.begin();
   auto ite2 = con.end();
@@ -36,12 +36,10 @@ void print_element(const Container &con, const std::string &name)
   std::cout << std::endl;
 }
 // 测试类
-class AContainerTestUSet : public ::testing::Test
-{
+class AContainerTestUSet : public ::testing::Test {
 protected:
   zfwstl::unordered_set<int> siset;
-  void priSet()
-  {
+  void priSet() {
     print_process("unordered_set:");
     zfwstl::unordered_set<int>::iterator ite1 = siset.begin();
     zfwstl::unordered_set<int>::iterator ite2 = siset.end();
@@ -51,8 +49,7 @@ protected:
     std::cout << std::endl;
   }
 
-  void SetUp() override
-  {
+  void SetUp() override {
     // 在每个测试用例执行前插入一些初始数据
     siset.insert(1);
     siset.insert(2);
@@ -61,8 +58,7 @@ protected:
 };
 //===============测试用例开始===============
 // 测试构造函数
-TEST_F(AContainerTestUSet, Constructor)
-{
+TEST_F(AContainerTestUSet, Constructor) {
 
   print_process("Default constructor");
   zfwstl::unordered_set<int> v3; // 默认构造
@@ -96,8 +92,7 @@ TEST_F(AContainerTestUSet, Constructor)
   EXPECT_EQ(mySet.size(), 3);
 }
 // 测试operator=复制赋值操作符
-TEST_F(AContainerTestUSet, AssignmentOperator)
-{
+TEST_F(AContainerTestUSet, AssignmentOperator) {
   print_process("Assignment operator");
   zfwstl::unordered_set<int> v3 = siset; // 赋值操作运算符
   EXPECT_EQ(v3, siset);
@@ -113,14 +108,14 @@ TEST_F(AContainerTestUSet, AssignmentOperator)
   EXPECT_NE(v5, siset);
 }
 // 测试 insert, erase 方法
-TEST_F(AContainerTestUSet, InsertErase)
-{
+TEST_F(AContainerTestUSet, InsertErase) {
   print_process("Inserts a single element at the specified position");
   auto res = siset.insert(100); // 在指定位置插入单个元素
   EXPECT_EQ(*(res.first), 100);
   EXPECT_EQ(siset.size(), 4);
 
-  print_process("Inserts more than one of the same elements at the specified location");
+  print_process(
+      "Inserts more than one of the same elements at the specified location");
   zfwstl::unordered_set<int> v3({6, 888});
   siset.insert(v3.begin(), v3.end()); // 在指定位置插入多个相同元素
   EXPECT_EQ(siset.size(), 6);
@@ -139,15 +134,13 @@ TEST_F(AContainerTestUSet, InsertErase)
   priSet();
 }
 // 测试 clear 方法
-TEST_F(AContainerTestUSet, Clear)
-{
+TEST_F(AContainerTestUSet, Clear) {
   print_process("clear & empty");
   siset.clear();
   EXPECT_TRUE(siset.empty());
 }
 // 测试 swap 方法
-TEST_F(AContainerTestUSet, Swap)
-{
+TEST_F(AContainerTestUSet, Swap) {
   print_process("Swap");
   zfwstl::unordered_set<int> v3({21, 54, 265, 987});
   siset.swap(v3);
@@ -155,8 +148,7 @@ TEST_F(AContainerTestUSet, Swap)
   EXPECT_EQ(v3.size(), 3);
 }
 // 测试一系列反向迭代器rbegin, rend()
-TEST_F(AContainerTestUSet, BeginEndIterators)
-{
+TEST_F(AContainerTestUSet, BeginEndIterators) {
   print_process("rbegin/end & rcbegin/end");
   auto it = siset.begin();
   EXPECT_EQ(*it, 1); // 检查 begin() 是否指向第一个元素
@@ -164,8 +156,7 @@ TEST_F(AContainerTestUSet, BeginEndIterators)
   auto cbegin_it = siset.cbegin();
   EXPECT_EQ(*cbegin_it, 1); // 检查 cbegin() 是否指向第一个元素
 }
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   print_start();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
