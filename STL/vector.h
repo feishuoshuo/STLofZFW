@@ -4,14 +4,13 @@
  * 容器
  * 迭代器：Random Access iterators
  */
-#include "../src/memory/allocator.h" // 标准空间配置器
-#include <cstddef>                   // for size_t, ptrdiff_t
-#include <initializer_list>          // for initializer_list
-// #include "../src/util.h"                 //for forward
 #include "../src/algorithms/algorithm.h" // for lexicographical_compare(), equal(), max(), copy_backward(), fill(), copy()
 #include "../src/exceptdef.h" // for 宏 MYSTL_DEBUG, THROW_LENGTH_ERROR_IF
 #include "../src/iterator.h" // for reverse_iterator, iterator_category()萃取迭代器类型, distance(), advance(), is_input_iterator, forward_iterator_tag
+#include "../src/memory/allocator.h" // 标准空间配置器
 #include "../src/memory/unintialized.h" // for uninitialized_fill_n() uninitialized_copy(), uninitialized_move()
+#include <initializer_list> // for initializer_list
+
 namespace zfwstl {
 template <class T /*,class Alloc=alloc*/> class vector {
 public:
