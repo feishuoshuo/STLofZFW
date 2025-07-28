@@ -12,7 +12,7 @@ file(GLOB TEST_SOURCES "test_*.cpp")
 # 明确指定源文件
 # set(TEST_SOURCES test_STLContainer_deque.cpp test_STLContainer_hashtable.cpp)
 
-#############所有.cpp汇总创建一个可执行文件######################
+#############所有.cpp汇总创建一个可执行文件 仅针对conmmon_test文件夹中普通测试######################
 # # 添加一个可执行文件，包含所有测试用例
 # add_executable(AllTests ${TEST_SOURCES})
 # # 链接GTest库

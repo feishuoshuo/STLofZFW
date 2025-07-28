@@ -2,6 +2,7 @@
 #define GOOGLETEST_SAMPLES_deque_H_
 #include "../STL/deque.h"
 #include "../STL/vector.h"
+#include "utilFunction.h"
 #include <cstddef> // for size_t, ptrdiff_t
 #include <gtest/gtest.h>
 #include <iostream>
@@ -14,17 +15,6 @@
  * PushBack：测试 push_back 方法是否正确增加了元素并更新了大小。
  * Insert：测试 insert 方法是否正确插入了元素，并检查了插入位置及其后元素的状态
  */
-void print_start() {
-  std::cout
-      << "[===============================================================]\n";
-  std::cout
-      << "[----------------- Run container test : deque -----------------]\n";
-  std::cout
-      << "[-------------------------- API test ---------------------------]\n";
-}
-void print_process(std::string tmp) {
-  std::cout << "[---- " << tmp << " ----]\n";
-}
 template <class Container>
 void print_element(const Container &con, const std::string &name) {
   std::cout << name << " contains: ";
@@ -267,7 +257,7 @@ TEST_F(SContainerTestDeque, ShrinkToFit) {
   d.shrink_to_fit();
 }
 int main(int argc, char **argv) {
-  print_start();
+  print_start("deque");
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

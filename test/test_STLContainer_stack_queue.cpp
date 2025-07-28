@@ -2,6 +2,7 @@
 #define GOOGLETEST_SAMPLES_stack_queue_H_
 #include "../STL/queue.h"
 #include "../STL/stack.h"
+#include "utilFunction.h"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
@@ -10,18 +11,6 @@
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
  * -----------------------------------------------------
  */
-void print_start() {
-  std::cout
-      << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : stack/queue "
-               "-----------------]\n";
-  std::cout
-      << "[-------------------------- API test ---------------------------]\n";
-}
-void print_process(std::string tmp) {
-  std::cout << "[-------------------------- " << tmp
-            << " ---------------------------]\n";
-}
 // 测试类
 class SContainerTestStack : public ::testing::Test {
 protected:
@@ -197,7 +186,7 @@ TEST_F(SContainerTestQueue, CompareOperator) {
   EXPECT_FALSE(v1 > v2);
 }
 int main(int argc, char **argv) {
-  print_start();
+  print_start("stack/queue");
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

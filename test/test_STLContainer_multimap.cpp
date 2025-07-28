@@ -3,7 +3,8 @@
 #include "../STL_2/multimap.h"
 #include "../STL_2/multiset.h"
 #include "../src/util.h" // for make_pair
-#include <cstddef>       // for size_t, ptrdiff_t
+#include "utilFunction.h"
+#include <cstddef> // for size_t, ptrdiff_t
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
@@ -15,17 +16,6 @@
  * PushBack：测试 push_back 方法是否正确增加了元素并更新了大小。
  * Insert：测试 insert 方法是否正确插入了元素，并检查了插入位置及其后元素的状态
  */
-void print_start() {
-  std::cout
-      << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : multi_map "
-               "-----------------]\n";
-  std::cout
-      << "[-------------------------- API test ---------------------------]\n";
-}
-void print_process(std::string tmp) {
-  std::cout << "[---- " << tmp << " ----]\n";
-}
 // 测试类
 class AContainerTestMMap : public ::testing::Test {
 protected:
@@ -229,7 +219,7 @@ TEST_F(AContainerTestMMap, BeginEndIterators) {
             "one"); // 检查 crend() 前一个元素是否是最后一个元素
 }
 int main(int argc, char **argv) {
-  print_start();
+  print_start("multi_map");
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

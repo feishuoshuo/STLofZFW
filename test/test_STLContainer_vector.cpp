@@ -1,6 +1,7 @@
 #ifndef GOOGLETEST_SAMPLES_vector_H_
 #define GOOGLETEST_SAMPLES_vector_H_
 #include "../STL/vector.h"
+#include "utilFunction.h"
 #include <cstddef> // for size_t, ptrdiff_t
 #include <gtest/gtest.h>
 #include <iostream>
@@ -13,17 +14,6 @@
  * PushBack：测试 push_back 方法是否正确增加了元素并更新了大小。
  * Insert：测试 insert 方法是否正确插入了元素，并检查了插入位置及其后元素的状态
  */
-void print_start() {
-  std::cout
-      << "[===============================================================]\n";
-  std::cout
-      << "[----------------- Run container test : vector -----------------]\n";
-  std::cout
-      << "[-------------------------- API test ---------------------------]\n";
-}
-void print_process(std::string tmp) {
-  std::cout << "[---- " << tmp << " ----]\n";
-}
 template <class Container>
 void print_element(const Container &con, const std::string &name) {
   std::cout << name << " contains: ";
@@ -241,7 +231,7 @@ TEST_F(SContainerTestVec, BeginEndIterators) {
   EXPECT_EQ(*(--crend_it), 6); // 检查 crend() 前一个元素是否是最后一个元素
 }
 int main(int argc, char **argv) {
-  print_start();
+  print_start("vector");
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

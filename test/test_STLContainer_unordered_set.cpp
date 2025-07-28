@@ -2,7 +2,8 @@
 #define GOOGLETEST_SAMPLES_map_H_
 #include "../STL_2/unordered_set.h"
 #include "../src/util.h" // for make_pair
-#include <cstddef>       // for size_t, ptrdiff_t
+#include "utilFunction.h"
+#include <cstddef> // for size_t, ptrdiff_t
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
@@ -14,17 +15,6 @@
  * PushBack：测试 push_back 方法是否正确增加了元素并更新了大小。
  * Insert：测试 insert 方法是否正确插入了元素，并检查了插入位置及其后元素的状态
  */
-void print_start() {
-  std::cout
-      << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : unordered_set "
-               "-----------------]\n";
-  std::cout
-      << "[-------------------------- API test ---------------------------]\n";
-}
-void print_process(std::string tmp) {
-  std::cout << "[---- " << tmp << " ----]\n";
-}
 template <class Container>
 void print_element(const Container &con, const std::string &name) {
   std::cout << name << " ";
@@ -157,7 +147,7 @@ TEST_F(AContainerTestUSet, BeginEndIterators) {
   EXPECT_EQ(*cbegin_it, 1); // 检查 cbegin() 是否指向第一个元素
 }
 int main(int argc, char **argv) {
-  print_start();
+  print_start("unordered_set");
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

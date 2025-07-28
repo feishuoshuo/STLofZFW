@@ -2,6 +2,7 @@
 #define GOOGLETEST_SAMPLES_priority_queue_H_
 #include "../STL/priority_queue.h"
 #include "../STL/vector.h"
+#include "utilFunction.h"
 #include <cstddef> // for size_t, ptrdiff_t
 #include <gtest/gtest.h>
 #include <iostream>
@@ -11,18 +12,6 @@
  * 测试类继承自 ::testing::Test，它将用于所有测试用例
  * -----------------------------------------------------
  */
-void print_start() {
-  std::cout
-      << "[===============================================================]\n";
-  std::cout << "[----------------- Run container test : priority queue "
-               "-----------------]\n";
-  std::cout
-      << "[-------------------------- API test ---------------------------]\n";
-}
-void print_process(std::string tmp) {
-  std::cout << "[-------------------------- " << tmp
-            << " ---------------------------]\n";
-}
 template <class Container>
 void print_element(const Container &con, const std::string &name) {
   std::cout << name << " contains: ";
@@ -116,7 +105,7 @@ TEST_F(SContainerTestPriQue, Swap) {
   EXPECT_EQ(v1.top(), 15);
 }
 int main(int argc, char **argv) {
-  print_start();
+  print_start("priority queue");
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
